@@ -1,6 +1,5 @@
 .m-input{
     font-size: 14px;
-    min-height: 40px;
     color: #000;
     position: relative;
     padding: 0 34px;
@@ -8,6 +7,8 @@
     border: 1px solid #babec5;
     box-sizing: border-box;
     width: 100%;
+    min-height: 32px;
+    height: 100%;
     outline: none;
     font-family: GoogleSans;
 }

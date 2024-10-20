@@ -1,7 +1,7 @@
 <template>
     <button :class="str" :disabled="disabled" ref="btn">
         <slot name="icon"></slot>
-        <div class="btn-text">
+        <div class="btn-text" v-if="text">
             {{ text }}
         </div>
     </button>

@@ -93,12 +93,65 @@ strong{
     justify-content: center;
 }
 
+.space-between {
+    align-items:center;
+    justify-content:space-between;
+}
+
+.mtop-12 {
+    margin-top: 12px;
+}
+
+.only-icon {
+    width: 32px;
+    min-width: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.h-3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.h-4 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.h-32 {
+    height: 32px;
+}
+
+.gap-4{
+    gap: 4px;
+}
+
+.gap-8 {
+    gap: 8px;
+}
+
 .w-full{
     width: 100%;
 }
 
 .text-center{
     text-align: center;
+}
+
+.modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    /* Đảm bảo modal nằm trên cùng */
 }
 
 .pointer{
