@@ -14,9 +14,10 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 /* import specific icons */
 import { faUserSecret, faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 
 /* add icons to the library */
-library.add(faUserSecret, faFilter)
+library.add(faUserSecret, faFilter, faEllipsis)
 
 // Components
 import BaseInput from './components/base/input/BaseInput.vue';

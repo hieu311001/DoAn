@@ -78,6 +78,12 @@ strong{
     padding: 0 6px;
 }
 
+.fix-row{
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+}
+
 .asterik{
     color: #e54848;
 }

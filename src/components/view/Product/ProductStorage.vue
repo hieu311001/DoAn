@@ -3,7 +3,7 @@
         <div class="cart-container">
             <div class="cart-title flex space-between">
                 <div class="title-left">
-                    <h2>Giỏ hàng hiện tại</h2>
+                    <h2>Nhập hàng</h2>
                 </div>
                 <div class="title-right">
                     <div class="icon-close" @click="closeCart">
@@ -15,37 +15,33 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Số lượng</th>
+                            <th>Hình ảnh</th>
                             <th>Sản phẩm</th>
-                            <th>Giá</th>
+                            <th>Số lượng</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="product in localCart" :key="product.ProductID">
+                            <td class="center">
+                                <img :src="product.Image" alt="Product Image" class="product-image" />
+                            </td>
+                            <td>{{ product.ProductName }}</td>
                             <td>
                                 <BaseCounter v-model="product.Quantity" :valueInput="product.Quantity"></BaseCounter>
                             </td>
-                            <td>{{ product.ProductName }}</td>
-                            <td>{{ formatPrice(product.Price * product.Quantity) }}</td>
                             <td>
                                 <button @click="removeFromCart(product.ProductID)">Xóa</button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div class="total">
-                    <strong>Tổng tiền:</strong> {{ formatPrice(total) }}
-                </div>
             </div>
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
                     <div class="filter-btn__close">
-                        <BaseButton class="m-button btn-white" text="Thanh toán" @click="checkout">
+                        <BaseButton class="m-button btn-white" text="Tạo yêu cầu" @click="checkout">
                         </BaseButton>
-                    </div>
-                    <div class="filter-btn__save">
-                        <BaseButton class="m-button btn-white" text="In hóa đơn" @click="printInvoice"></BaseButton>
                     </div>
                 </div>
             </div>
@@ -127,6 +123,25 @@ const closeCart = () => {
     .filter-bot {
         justify-content: flex-end;
         padding-top: 12px;
+    }
+
+    .image-container {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        /* Đặt chiều cao cố định hoặc điều chỉnh theo ý muốn */
+        overflow: hidden;
+        border-radius: 8px;
+        /* Bo góc ảnh nếu cần */
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        /* Đảm bảo ảnh lấp đầy container mà không bị méo */
+        border-radius: inherit;
+        /* Giữ bo góc giống container */
     }
 }
 

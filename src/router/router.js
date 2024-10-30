@@ -4,6 +4,7 @@ import RegisterPage from '@/components/view/Auth/RegisterPage';
 import ForgotPasswordPage from '@/components/view/Auth/ForgotPasswordPage'
 import TheHome from '@/components/view/Home/TheHome';
 import SellPage from '@/components/view/Sells/SellPage';
+import ProductPage from '@/components/view/Product/ProductPage.vue';
 
 const routes = [
   {
@@ -32,6 +33,14 @@ const routes = [
     components: {
       default: SellPage,
       content: SellPage, 
+    },
+  },
+  {
+    path: '/product',
+    name: 'product',
+    components: {
+      default: ProductPage,
+      content: ProductPage, 
     },
   },
 ]

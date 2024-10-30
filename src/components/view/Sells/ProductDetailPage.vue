@@ -13,13 +13,13 @@
             </div>
             <div class="product-main flex">
                 <div class="product-image">
-                    <img :src="product.image" :alt="product.name" />
+                    <img :src="product.Image" :alt="product.ProductName" />
                 </div>
                 <div class="product-info">
-                    <h2>{{ product.name }}</h2>
-                    <p class="price">{{ formatPrice(product.price) }}</p>
-                    <p class="description" v-html="product.description"></p>
-                    <div class="add-cart">
+                    <h2>{{ product.ProductName }}</h2>
+                    <p class="price">{{ formatPrice(product.Price) }}</p>
+                    <p class="description" v-html="product.Description"></p>
+                    <div class="add-cart" v-if="!isImport">
                         <BaseCounter v-model="quantity"></BaseCounter>
                         <button class="add-to-cart-button" @click="addToCart">Thêm vào giỏ</button>
                     </div>
@@ -57,6 +57,10 @@ import { ref, computed, watch, defineEmits, defineProps } from 'vue';
 const emit = defineEmits(['update:modelValue', 'closeProduct', 'addToCart']);
 const props = defineProps({
     product: null, // Data mà component cha gửi xuống
+    isImport: {
+        default: false,
+        type: Boolean,
+    },
 })
 
 const quantity = ref(1);

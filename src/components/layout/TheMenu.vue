@@ -19,7 +19,7 @@
                             <div class="menu-item__text">Bán hàng</div>
                         </div>
                     </router-link>
-                    <router-link to="" class="menu-focus" active-class="active">
+                    <router-link to="/product" class="menu-focus" active-class="active">
                         <div class="menu-item">
                             <div class="menu-item__icon">
                                 <icon class="icon icon-tq"></icon>
@@ -27,12 +27,20 @@
                             <div class="menu-item__text">Quản lý sản phẩm</div>
                         </div>
                     </router-link>
-                    <router-link to="" class="menu-focus" active-class="active">
+                    <router-link to="/order" class="menu-focus" active-class="active">
                         <div class="menu-item">
                             <div class="menu-item__icon">
                                 <icon class="icon icon-tq"></icon>
                             </div>
                             <div class="menu-item__text">Quản lý đơn hàng</div>
+                        </div>
+                    </router-link>
+                    <router-link to="/history" class="menu-focus" active-class="active">
+                        <div class="menu-item">
+                            <div class="menu-item__icon">
+                                <icon class="icon icon-tq"></icon>
+                            </div>
+                            <div class="menu-item__text">Lịch sử hoạt động</div>
                         </div>
                     </router-link>
                     <router-link to="/report" class="menu-focus" active-class="active">

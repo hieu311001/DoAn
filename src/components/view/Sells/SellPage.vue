@@ -69,16 +69,16 @@
             </div>
             <div class="content-grid">
                 <div class="product-grid">
-                    <div class="product-box" v-for="product in dataCells" :key="product.id"
+                    <div class="product-box" v-for="product in dataCells" :key="product.ProductID"
                         @dblclick="viewProductDetail(product)">
                         <div class="image-container">
-                            <img :src="product.image" alt="Product Image" class="product-image" />
-                            <div v-if="product.discount > 0" class="discount-badge">
-                                -{{ product.discount }}%
+                            <img :src="product.Image" alt="Product Image" class="product-image" />
+                            <div v-if="product.Sale > 0" class="Sale-badge">
+                                -{{ product.Sale }}%
                             </div>
                         </div>
-                        <h3 class="product-name">{{ product.name }}</h3>
-                        <p class="product-price">{{ formatNumber(product.price) }}</p>
+                        <h3 class="product-name">{{ product.ProductName }}</h3>
+                        <p class="product-price">{{ formatNumber(product.Price) }}</p>
                         <button @click="addToCart(product)" class="add-to-cart-button">Thêm vào giỏ</button>
                     </div>
                 </div>
@@ -192,14 +192,16 @@ const closeProduct = () => {
 const addToCartDetail = (data) => {
     let quantity = data.quantity;
     let product = data.product;
-    product.quantity = quantity;
+    product.Quantity = quantity;
 
-    const existingProduct = cart.value.find(item => item.id === product.id);
+    const existingProduct = cart.value.find(item => item.ProductID === product.ProductID);
     if (!existingProduct) {
         cart.value.push({ ...product, selected: false });
     } else {
-        existingProduct.quantity = quantity;
+        existingProduct.Quantity = quantity;
     }
+
+    showDetail.value = false;
 }
 
 const handleToggleFilter = () => {
@@ -214,8 +216,9 @@ const handleCloseFilter = () => {
 }
 
 const addToCart = (product) => {
-    const existingProduct = cart.value.find(item => item.id === product.id);
+    const existingProduct = cart.value.find(item => item.ProductID === product.ProductID);
     if (!existingProduct) {
+        product.Quantity = 1;
         cart.value.push({ ...product, selected: false });
     }
 };
@@ -344,7 +347,7 @@ const formatNumber = (number) => {
         }
 
         /* Badge giảm giá nằm trong ảnh */
-        .discount-badge {
+        .Sale-badge {
             position: absolute;
             top: 5px;
             left: 5px;
