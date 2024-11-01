@@ -5,6 +5,7 @@ import ForgotPasswordPage from '@/components/view/Auth/ForgotPasswordPage'
 import TheHome from '@/components/view/Home/TheHome';
 import SellPage from '@/components/view/Sells/SellPage';
 import ProductPage from '@/components/view/Product/ProductPage.vue';
+import ProductOrderPage from '@/components/view/ProductOrder/ProductOrderPage.vue';
 
 const routes = [
   {
@@ -41,6 +42,14 @@ const routes = [
     components: {
       default: ProductPage,
       content: ProductPage, 
+    },
+  },
+  {
+    path: '/product-order',
+    name: 'product-order',
+    components: {
+      default: ProductOrderPage,
+      content: ProductOrderPage, 
     },
   },
 ]

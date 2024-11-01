@@ -77,6 +77,9 @@ const closeProduct = () => {
 }
 
 const addToCart = () => {
+    if (!quantity.value) {
+        quantity.value = 1;
+    }
     emit('addToCart', {quantity: quantity.value, product: props.product});
 }
 

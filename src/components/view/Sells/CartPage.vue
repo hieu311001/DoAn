@@ -15,18 +15,22 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Số lượng</th>
+                            <th>Hình ảnh</th>
                             <th>Sản phẩm</th>
+                            <th>Số lượng</th>
                             <th>Giá</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="product in localCart" :key="product.ProductID">
+                            <td style="text-align:center">
+                                <img :src="product.Image" alt="Product Image" class="product-image" />
+                            </td>
+                            <td>{{ product.ProductName }}</td>
                             <td>
                                 <BaseCounter v-model="product.Quantity" :valueInput="product.Quantity"></BaseCounter>
                             </td>
-                            <td>{{ product.ProductName }}</td>
                             <td>{{ formatPrice(product.Price * product.Quantity) }}</td>
                             <td>
                                 <button @click="removeFromCart(product.ProductID)">Xóa</button>
@@ -41,11 +45,8 @@
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
                     <div class="filter-btn__close">
-                        <BaseButton class="m-button btn-white" text="Thanh toán" @click="checkout">
+                        <BaseButton class="m-button btn-white" text="Tạo đơn hàng" @click="checkout">
                         </BaseButton>
-                    </div>
-                    <div class="filter-btn__save">
-                        <BaseButton class="m-button btn-white" text="In hóa đơn" @click="printInvoice"></BaseButton>
                     </div>
                 </div>
             </div>
@@ -127,6 +128,15 @@ const closeCart = () => {
     .filter-bot {
         justify-content: flex-end;
         padding-top: 12px;
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        /* Đảm bảo ảnh lấp đầy container mà không bị méo */
+        border-radius: inherit;
+        /* Giữ bo góc giống container */
     }
 }
 
