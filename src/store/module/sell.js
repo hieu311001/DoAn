@@ -4,6 +4,7 @@ const state = {
             ProductName: 'Sản phẩm 1',
             Price: 100000,
             Sale: 10,
+            TotalAmount: 200,
             Image: 'https://phuotbuistore.com/wp-content/uploads/2024/03/khan-trum-dau-ninja-motowolf-1919-1-300x300.jpg',
             Description: "<p>Được thiết kế từ chất liệu <strong>polyester</strong> siêu thoáng mát và thấm hút mồ hôi tốt.</p><p>Giúp ngăn ngừa bụi bặm khi đi xa cũng như giảm đáng kể mồ hôi dính vào lót mũ.</p><p>Đặc biệt mã sản phẩm <strong>MDL1919</strong> làm từ vải <em>coolmax</em> có độ thoáng mát tốt, tăng cảm giác thoải mái khi sử dụng.</p>"
         },
@@ -12,6 +13,7 @@ const state = {
             ProductName: 'Sản phẩm 2',
             Price: 200000,
             Sale: 0,
+            TotalAmount: 200,
             Image: 'https://phuotbuistore.com/wp-content/uploads/2024/03/khan-trum-dau-ninja-motowolf-1919-1-300x300.jpg'
         },
         {

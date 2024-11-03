@@ -1,7 +1,7 @@
 <template>
     <div class="container-sell">
         <div class="title h-4">
-            Danh sách đơn hàng
+            Danh sách yêu cầu nhập hàng
         </div>
         <div class="content">
             <div class="content-filter flex space-between">
@@ -66,28 +66,24 @@
                     <table class="product-table">
                         <thead>
                             <tr class="fix-row">
-                                <th>Khách hàng</th>
+                                <th>Tên cửa hàng</th>
                                 <th>Ngày tạo</th>
-                                <th>Tổng tiền</th>
-                                <th>Thanh toán</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in productOrders" :key="product.ProductOrderID"
+                            <tr v-for="product in productStorages" :key="product.ProductID"
                                 @dblclick="viewProductDetail(product)"
-                                @mouseenter="hoveredProductId = product.ProductOrderID"
-                                @mouseleave="hoveredProductId = null"
-                                :class="{ 'row-hover': hoveredProductId === product.ProductOrderID }">
-                                <td>{{ product.FullName }}</td>
-                                <td>{{ formatDate(product.OrderDate) }}</td>
-                                <td>{{ formatNumber(product.TotalAmount) }} đ</td>
-                                <td>{{ getValueEnum(product.PaymentMethod, "PaymentMethod") }}</td>
-                                <td>{{ getValueEnum(product.Status, "ProductOrderStatus") }}</td>
+                                @mouseenter="hoveredProductId = product.ProductID" @mouseleave="hoveredProductId = null"
+                                :class="{ 'row-hover': hoveredProductId === product.ProductID }">
+                                <td>{{ product.StoreName }}</td>
+                                <td>{{ formatDate(product.CreateDate) }}</td>
+                                <td>{{ getValueEnum(product.Status, "StorageOrderStatus") }}</td>
                                 <td>
                                     <div class="edit pointer" @click="viewProductDetail(product)" title="Cập nhật">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24" height="24">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="24"
+                                            height="24">
                                             <path
                                                 d="M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z" />
                                         </svg>
@@ -98,19 +94,17 @@
                     </table>
                 </div>
             </div>
-            <div class="total-footer">
-                <strong>Tổng số:</strong> {{ productOrders.length }} đơn hàng
-            </div>
         </div>
-        <ProductOrderDetail v-if="showDetail" @closeOrderDetail="closeOrderDetail">
-        </ProductOrderDetail>
+        <ProductStorageDetail :product="productDetail" :isImport="true" v-if="showDetail" @closeOrderDetail="closeProduct">
+        </ProductStorageDetail>
     </div>
 </template>
 
 <script setup>
+import { openModal } from '@/utils/modalStore';
 import { ref, onMounted, onUpdated, computed, watch, reactive, onBeforeMount, watchEffect } from 'vue';
 import { useStore } from 'vuex';
-import ProductOrderDetail from './ProductOrderDetail.vue';
+import ProductStorageDetail from './ProductStorageDetail.vue';
 import { getValueEnum, formatDate } from '@/common/commonFn';
 
 const showFilter = ref(false);
@@ -174,40 +168,24 @@ const dataPrice = [
 
 const store = useStore();
 
-const productOrders = computed(() => store.state.productOrder.dataProductOrders);
+const productStorages = computed(() => store.state.productStore.dataProductStores);
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
-const cart = ref([]);
-const showCart = ref(false);
 const showDetail = ref(false);
 const productDetail = ref(null);
 
 // Quản lý trạng thái hover và popup
 const hoveredProductId = ref(null);
 
-const openCart = () => {
-    showCart.value = true;
-}
-
 const viewProductDetail = (product) => {
     productDetail.value = product;
     showDetail.value = true;
 };
 
-const updateCart = (cartData) => {
-    cart.value = cartData;
-}
-
-const closeOrderDetail = () => {
+const closeProduct = () => {
     showDetail.value = false;
 }
-
-const getStatus = (stock) => (stock === 0 ? 'Hết hàng' : stock <= 15 ? 'Sắp hết' : 'Còn hàng');
-
-const getStatusClass = (stock) => {
-    return stock === 0 ? 'out-of-stock' : stock <= 15 ? 'low-stock' : 'in-stock';
-};
 
 const handleToggleFilter = () => {
     let posBtn = refFilterBtn.value.getBoundingClientRect();
@@ -219,21 +197,6 @@ const handleToggleFilter = () => {
 const handleCloseFilter = () => {
     showFilter.value = false;
 }
-
-const addToCart = (product) => {
-    const existingProduct = cart.value.find(item => item.ProductOrderID === product.ProductOrderID);
-    if (!existingProduct) {
-        cart.value.push({ ...product, selected: false });
-    }
-};
-
-const formatNumber = (number) => {
-    return new Intl.NumberFormat('vi-VN', {
-        minimumFractionDigits: 0, // Số chữ số thập phân tối thiểu
-        maximumFractionDigits: 2, // Số chữ số thập phân tối đa
-    }).format(number);
-};
-
 </script>
 
 <style lang="scss" scoped>
@@ -320,7 +283,7 @@ const formatNumber = (number) => {
     }
 
     .content-grid {
-        height: calc(100vh - 236px);
+        height: calc(100vh - 196px);
         overflow: auto;
         margin-top: 12px;
 
@@ -349,6 +312,8 @@ const formatNumber = (number) => {
         }
 
         .product-image {
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             /* Đảm bảo ảnh lấp đầy container mà không bị méo */
             border-radius: inherit;
@@ -452,10 +417,6 @@ const formatNumber = (number) => {
         width: 24px;
         height: 24px;
         fill: currentColor;
-    }
-
-    .total-footer {
-        margin-top: 12px;
     }
 }
 

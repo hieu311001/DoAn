@@ -37,11 +37,11 @@
 
             <div class="order-status flex">
                 <p><strong>Trạng Thái Đơn Hàng:</strong></p>
-                <BaseCombobox id="category" propValue="Value" propText="Text"
-                    :data=orderStatus @getValueCombobox="getDataCombobox" :resetValue="resetValue" />
+                <BaseCombobox id="category" :disabled="!isEdit" propValue="Value" propText="Text"
+                :valueCombobox="0" :data=orderStatus @getValueCombobox="getDataCombobox" :resetValue="resetValue" />
             </div>
 
-            <div class="order-footer">
+            <div class="order-footer" v-if="isEdit">
                 <div class="filter-bot flex gap-8">
                     <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder">
                     </BaseButton>
@@ -56,7 +56,10 @@ import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeOrderDetail']);
 const props = defineProps({
-    cart: null, // Data mà component cha gửi xuống
+    isEdit: {
+        type: Boolean,
+        default: true
+    }, // Data mà component cha gửi xuống
 })
 
 const orderStatus = [

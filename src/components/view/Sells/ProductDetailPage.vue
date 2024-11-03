@@ -17,7 +17,14 @@
                 </div>
                 <div class="product-info">
                     <h2>{{ product.ProductName }}</h2>
-                    <p class="price">{{ formatPrice(product.Price) }}</p>
+                    <div class="product-price">
+                        <span :class="product.Sale ? 'sale' : ''">
+                            {{ formatNumber(product.Price) }} 
+                        </span>
+                        <span v-if="product.Sale">
+                            {{ formatNumber(product.Price * (1 - product.Sale / 100)) }} 
+                        </span>
+                    </div>
                     <p class="description" v-html="product.Description"></p>
                     <div class="add-cart" v-if="!isImport">
                         <BaseCounter v-model="quantity"></BaseCounter>
@@ -65,7 +72,7 @@ const props = defineProps({
 
 const quantity = ref(1);
 
-const formatPrice = (amount) => {
+const formatNumber = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND'
@@ -80,7 +87,7 @@ const addToCart = () => {
     if (!quantity.value) {
         quantity.value = 1;
     }
-    emit('addToCart', {quantity: quantity.value, product: props.product});
+    emit('addToCart', { quantity: quantity.value, product: props.product });
 }
 
 </script>
@@ -126,7 +133,7 @@ const addToCart = () => {
 
     .add-cart {
         display: flex;
-        align-items:center;
+        align-items: center;
         gap: 8px;
     }
 }
@@ -144,10 +151,15 @@ const addToCart = () => {
     justify-content: space-between;
 }
 
-.price {
+.product-price {
     font-size: 20px;
     font-weight: bold;
     color: #e53935;
+
+    .sale {
+        text-decoration: line-through;
+        margin-right: 12px;
+    }
 }
 
 .description {

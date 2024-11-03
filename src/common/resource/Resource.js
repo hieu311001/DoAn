@@ -38,6 +38,7 @@ export const Role = {
 export const StorageOrderStatus = {
     Processing: "Đang xử lý",
     Done: "Đã xử lý",
+    Cancel: "Đã hủy"
 }
 
 export default Resource;

@@ -7,9 +7,9 @@
                 </div>
                 <div class="nav-left__logo">
                     <div class="nav-logo">
-                        <icon class="icon icon-logo logo-cegov"></icon>
+                        <img src="https://phuotbuistore.com/wp-content/uploads/2018/11/Untitled-1.png" alt="Icon" width="32" height="32">
                     </div>
-                    <div class="nav-content">MISA CeGov</div>
+                    <div class="nav-content">Phượt Store</div>
                 </div>
             </div>
             <div class="nav-right" v-tooltip="{theme: {placement: 'bottom'}}">
@@ -62,6 +62,12 @@ export default {
 .nav-content{
     font-size: 20px;
     font-weight: 700;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    margin-right: 12px;
 }
 
 .nav-left__icon{

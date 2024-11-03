@@ -1,97 +1,70 @@
 <template>
     <div>
-      <div class="combobox" :autoFocus="autoFocus" :class="cbbClass" v-clickOutside="hideListData" ref="combobox">
-        <input
-          :id="id"
-          type="text"
-          class="input combobox__input"
-          ref="input"
-          v-model="textInput"
-          @input="inputOnChange"
-          @keydown="selecItemUpDown"
-          @mouseover="handleMouse"
-          @click="btnSelectDataOnClick"
-          :tabindex="tabindex"
-          :placeholder="placeholder"
-          :resetValue="resetValue"
-          autocomplete="off"
-        />
-        <div class="combobox-icon" @click="btnSelectDataOnClick" v-if="!clearIp">
-            <img src="@/assets/img/icon_arrow.svg" alt="">
-        </div>
-        <div class="combobox-icon icon-clear" @click="clearInput" v-if="clearIp && openClear">
-            <img src="@/assets/img/clear-input.jpg" alt="">
-        </div>
-        <div
-          v-if="isShowListData && dataFilter.length > 0"
-          class="combobox__data"
-          :class="{
-            'combobox-top': isPositionTop
-          }"
-          ref="combobox__data"
-        >
-          <a
-            class="combobox__item"
-            v-for="(item, index) in dataFilter"
-            :class="{
-              'combobox__item--focus': index == indexItemFocus,
-              'combobox__item--selected': index == indexItemSelected,
-            }"
-            :key="item[this.propValue]"
-            :ref="'toFocus_' + index"
-            :value="item[this.propValue]"
-            @click="itemOnSelect(item, index)"
-            @focus="saveItemFocus(index)"
-            @keydown="selecItemUpDown(index)"
-            @keyup="selecItemUpDown(index)"
-            tabindex="1"
-          >
-            <span>{{ item[this.propText] }}</span>
-            <div class="check-selected">
-              <icon class="icon icon-check"></icon>
+        <div class="combobox" :autoFocus="autoFocus" :class="cbbClass" v-clickOutside="hideListData" ref="combobox">
+            <input :id="id" :disabled="disabled" :class="disabled ? 'disabled' : ''" type="text" class="input combobox__input" ref="input" v-model="textInput"
+                @input="inputOnChange" @keydown="selecItemUpDown" @mouseover="handleMouse" @click="btnSelectDataOnClick"
+                :tabindex="tabindex" :placeholder="placeholder" :resetValue="resetValue" autocomplete="off" />
+            <div class="combobox-icon" @click="btnSelectDataOnClick" v-if="!clearIp">
+                <img src="@/assets/img/icon_arrow.svg" alt="">
             </div>
-          </a>
+            <div class="combobox-icon icon-clear" @click="clearInput" v-if="clearIp && openClear">
+                <img src="@/assets/img/clear-input.jpg" alt="">
+            </div>
+            <div v-if="isShowListData && dataFilter.length > 0" class="combobox__data" :class="{
+                'combobox-top': isPositionTop
+            }" ref="combobox__data">
+                <a class="combobox__item" v-for="(item, index) in dataFilter" :class="{
+                    'combobox__item--focus': index == indexItemFocus,
+                    'combobox__item--selected': index == indexItemSelected,
+                }" :key="item[this.propValue]" :ref="'toFocus_' + index" :value="item[this.propValue]"
+                    @click="itemOnSelect(item, index)" @focus="saveItemFocus(index)" @keydown="selecItemUpDown(index)"
+                    @keyup="selecItemUpDown(index)" tabindex="1">
+                    <span>{{ item[this.propText] }}</span>
+                    <div class="check-selected">
+                        <icon class="icon icon-check"></icon>
+                    </div>
+                </a>
+            </div>
         </div>
-      </div>
-      <div class="combobox-error" v-show="showError">{{ errorMsg }}</div>
+        <div class="combobox-error" v-show="showError">{{ errorMsg }}</div>
     </div>
 </template>
 <script>
 /* eslint-disable */
 
 function removeVietnameseTones(str) {
-    if(str && typeof(str) == "string") {
-    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-    str = str.replace(/đ/g, "d");
-    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
-    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
-    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
-    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
-    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
-    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
-    str = str.replace(/Đ/g, "D");
-    // Some system encode vietnamese combining accent as individual utf-8 characters
-    // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
-    str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
-    str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
-    // Remove extra spaces
-    // Bỏ các khoảng trắng liền nhau
-    str = str.replace(/ + /g, " ");
-    str = str.trim();
-    // Remove punctuations
-    // Bỏ dấu câu, kí tự đặc biệt
-    str = str.replace(
-        /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
-        " "
-    );
-    return str;
+    if (str && typeof (str) == "string") {
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        // Some system encode vietnamese combining accent as individual utf-8 characters
+        // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+        // Remove extra spaces
+        // Bỏ các khoảng trắng liền nhau
+        str = str.replace(/ + /g, " ");
+        str = str.trim();
+        // Remove punctuations
+        // Bỏ dấu câu, kí tự đặc biệt
+        str = str.replace(
+            /!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g,
+            " "
+        );
+        return str;
     }
-    
+
 }
 
 const keyCode = {
@@ -104,48 +77,49 @@ const keyCode = {
 export default {
     name: "MSCombobox",
     props: {
-    openClear: true,
-    getValue: null,
-    cbbClass: null,     // Class bố sung của combobox
-    valueCombobox: null,     // Giá trị biding vào
-    resetValue: true,   // Reset lại value của cbb
-    propValue: String,  // prop để lấy value
-    propText: String,   // prop để lấy text hiển thị
-    placeholder: {      // giá trị placeholder
-        type: String,
-        default: ""
-    },
-    data: [],           // dữ liệu combobox
-    isPositionTop: {    // Vị trí positiop top
-        type: Boolean,
-        default: false
-    },                  
-    errorMsg: {         // Msg lỗi
-        type: String,
-        default: ""
-    },                  
-    id: {               // id của cbb
-        type: String,
-        default: ""
-    },                  // tabindex
-    tabindex: {
-        type: Number,
-        default: -1
-    },                  // Focus vào vị trí nào lúc ban đầu
-    autoFocus: {
-        type: Number,
-        default: null
-    }
+        disabled: false,
+        openClear: true,
+        getValue: null,
+        cbbClass: null,     // Class bố sung của combobox
+        valueCombobox: null,     // Giá trị biding vào
+        resetValue: true,   // Reset lại value của cbb
+        propValue: String,  // prop để lấy value
+        propText: String,   // prop để lấy text hiển thị
+        placeholder: {      // giá trị placeholder
+            type: String,
+            default: ""
+        },
+        data: [],           // dữ liệu combobox
+        isPositionTop: {    // Vị trí positiop top
+            type: Boolean,
+            default: false
+        },
+        errorMsg: {         // Msg lỗi
+            type: String,
+            default: ""
+        },
+        id: {               // id của cbb
+            type: String,
+            default: ""
+        },                  // tabindex
+        tabindex: {
+            type: Number,
+            default: -1
+        },                  // Focus vào vị trí nào lúc ban đầu
+        autoFocus: {
+            type: Number,
+            default: null
+        }
     },
     watch: {
-        getValue: function() {
+        getValue: function () {
             this.textInput = "";
         },
         /**
          * Thực hiện 1 số thao tác khi data thay đổi
          * VMHieu 31/05/2023
          */
-        data: function() {
+        data: function () {
             if (this.autoFocus) {
                 let index = 0;
                 for (let i = 0; i < this.data.length; i++) {
@@ -171,7 +145,7 @@ export default {
          * Mặc định focus ban đầu váo ô có vị trí autoFocus
          * CreatedBy VMHieu 20/05/2023
          */
-        autoFocus: function() {
+        autoFocus: function () {
             if (this.autoFocus) {
                 let index = 0;
                 for (let i = 0; i < this.data.length; i++) {
@@ -185,7 +159,7 @@ export default {
                 this.$emit("update:modelValue", value);
             }
         },
-        valueCombobox: function() {
+        valueCombobox: function () {
             if (this.valueCombobox) {
                 let index = 0;
                 for (let i = 0; i < this.data.length; i++) {
@@ -203,201 +177,204 @@ export default {
         }
     },
     methods: {
-    /**
-     * Lưu lại index của item đã focus
-     * CreatedBy VMHieu 01/04/2023
-     */
-    saveItemFocus(index) {
-        this.indexItemFocus = index;
-    },
-    /**
-     * Sự kiện hover khi có lỗi
-     * CreatedBy VMHieu 09/05/2023
-     */
-    handleMouse() {
-        let input = this.$refs.input;
-        let combobox = this.$refs.combobox;
-        if (input.classList.contains("input-error")) {
-        combobox.classList.add("cbb-error");
-        } else {
-        combobox.classList.remove("cbb-error");
-        }
-    },
-
-    /**
-     * Ẩn danh sách item
-     * CreatedBy VMHieu 01/04/2023
-     */
-    hideListData() {
-        this.isShowListData = false;
-    },
-
-    /**
-     * Nhấn vào button thì hiển thị hoặc ẩn List Item
-     * CreatedBy VMHieu 01/04/2023
-     */
-    btnSelectDataOnClick() {
-        this.dataFilter = this.data;
-        this.isShowListData = !this.isShowListData;
-    },
-
-    /**
-     * Click chọn item trong danh sách
-     * CreatedBy VMHieu 01/04/2023
-     */
-    itemOnSelect(item, index) {
-        const text = item[this.propText];
-        const value = item[this.propValue];
-        this.textInput = "";
-        this.$refs.input.placeholder = text; 
-        this.indexItemSelected = index;
-        this.indexItemFocus = index;
-        this.isShowListData = false;
-        
-        if (this.openClear) {
-            this.clearIp = true;
-        }
-
-        this.$emit("update:modelValue", value);
-        this.$emit("changeValue");
-    },
-    /**
-     * Ấn nút clear input và cập nhật lại value
-     * VMHieu 31/05/2023
-     */
-    clearInput() {
-        this.$refs.input.placeholder = this.placeholder; 
-        this.indexItemSelected = null;
-        this.indexItemFocus = null;
-        this.clearIp = false;
-        this.textInput = "";
-
-        this.$emit("update:modelValue", "");
-    },
-    /**
-     * Hàm check input để in ra lỗi
-     * CreatedBy VMHieu 31/03/2023
-     */
-    handleChange() {
-        let arrs = this.data;
-        let flag = 0;
-        if (this.data && this.$refs.input.placeholder && typeof(this.$refs.input.placeholder) == "string") {
-        for (const arr in arrs) {
-            let str1 = removeVietnameseTones(arrs[arr][this.propText]).toLowerCase().replace(" ", "");
-            let str2 = removeVietnameseTones(this.$refs.input.placeholder).toLowerCase().replace(" ", "");
-            if (str1.includes(str2)){
-            flag++;
-            }
-        }
-
-        if (flag == 0) {
-            this.showError = true;
-            this.isShowListData = false;
-        } else {
-            this.showError = false;
-        }
-        } else {
-        this.showError = false;
-        }
-
-        if (this.$refs.input.placeholder == "") {
-        this.dataFilter = this.data;
-        }
-        
-    },
-
-    /**
-     * Nhập text thì thực hiện filter dữ liệu và hiển thị
-     * CreatedBy VMHieu 01/04/2023
-     */
-    inputOnChange() {
-        var me = this;
-        // Thực hiện lọc các phần tử phù hợp trong data:
-        this.dataFilter = this.data.filter((e) => {
-        if(me.textInput) {
-            this.clearIp = true;
-            let text = removeVietnameseTones(me.textInput)
-            .toLowerCase()
-            .replace(" ", "");
-            let textOfItem = removeVietnameseTones(e[me.propText])
-            .toLowerCase()
-            .replace(" ", "");
-            return textOfItem.includes(text);
-        }
-        });
-
-        this.handleChange();
-
-        if (this.dataFilter.length > 0 || !me.textInput) {
-        this.isShowListData = true;
-        }
-    },
-
-    /**
-     * Lựa chọn item bằng cách nhấn các phím lên, xuống trên bàn phím
-     * CreatedBy VMHieu 01/04/2023
-     */
-    selecItemUpDown(event) {
-        var me = this;
-        var keyCodePress = event.keyCode;
-        var elToFocus = null;
-
-        switch (keyCodePress) {
-        case keyCode.ESC:
-            this.isShowListData = false;
-            break;
-        case keyCode.ArrowDown:
-            this.isShowListData = true;
-            if (!this.$refs.input.placeholder || this.$refs.input.placeholder.length == 0 || this.showError){
-            this.dataFilter = this.data;
-            }
-            elToFocus = this.$refs[`toFocus_${me.indexItemFocus + 1}`];
-            if (
-            this.indexItemFocus == null ||
-            !elToFocus ||
-            elToFocus.length == 0
-            ) {
-            this.indexItemFocus = 0;
+        /**
+         * Lưu lại index của item đã focus
+         * CreatedBy VMHieu 01/04/2023
+         */
+        saveItemFocus(index) {
+            this.indexItemFocus = index;
+        },
+        /**
+         * Sự kiện hover khi có lỗi
+         * CreatedBy VMHieu 09/05/2023
+         */
+        handleMouse() {
+            let input = this.$refs.input;
+            let combobox = this.$refs.combobox;
+            if (input.classList.contains("input-error")) {
+                combobox.classList.add("cbb-error");
             } else {
-            this.indexItemFocus += 1;
+                combobox.classList.remove("cbb-error");
             }
-            break;
-        case keyCode.ArrowUp:
-            this.isShowListData = true;
-            if (!this.$refs.input.placeholder || this.$refs.input.placeholder.length == 0 || this.showError){
-                this.dataFilter = this.data;
+        },
+
+        /**
+         * Ẩn danh sách item
+         * CreatedBy VMHieu 01/04/2023
+         */
+        hideListData() {
+            this.isShowListData = false;
+        },
+
+        /**
+         * Nhấn vào button thì hiển thị hoặc ẩn List Item
+         * CreatedBy VMHieu 01/04/2023
+         */
+        btnSelectDataOnClick() {
+            if (this.disabled) {
+                this.isShowListData = true;
             }
-            elToFocus = this.$refs[`toFocus_${me.indexItemFocus - 1}`];
-            if (
-            this.indexItemFocus == null ||
-            !elToFocus ||
-            elToFocus.length == 0
-            ) {
-            this.indexItemFocus = this.dataFilter.length - 1;
-            } else {
-            this.indexItemFocus -= 1;
-            }
-            break;
-        case keyCode.Enter:
-            elToFocus = this.$refs[`toFocus_${me.indexItemFocus}`];
-            if (!this.$refs.input.placeholder) {
             this.dataFilter = this.data;
             this.isShowListData = !this.isShowListData;
-            } else {
-            if (this.dataFilter.length > 0) {
-                this.isShowListData = !this.isShowListData;
-            }
-            }
-            if (elToFocus && elToFocus.length > 0) {
-            elToFocus[0].click();
+        },
+
+        /**
+         * Click chọn item trong danh sách
+         * CreatedBy VMHieu 01/04/2023
+         */
+        itemOnSelect(item, index) {
+            const text = item[this.propText];
+            const value = item[this.propValue];
+            this.textInput = "";
+            this.$refs.input.placeholder = text;
+            this.indexItemSelected = index;
+            this.indexItemFocus = index;
             this.isShowListData = false;
-            this.dataFilter = this.data
+
+            if (this.openClear) {
+                this.clearIp = true;
             }
-            break;
-        default:
-            break;
+
+            this.$emit("update:modelValue", value);
+            this.$emit("changeValue");
+        },
+        /**
+         * Ấn nút clear input và cập nhật lại value
+         * VMHieu 31/05/2023
+         */
+        clearInput() {
+            this.$refs.input.placeholder = this.placeholder;
+            this.indexItemSelected = null;
+            this.indexItemFocus = null;
+            this.clearIp = false;
+            this.textInput = "";
+
+            this.$emit("update:modelValue", "");
+        },
+        /**
+         * Hàm check input để in ra lỗi
+         * CreatedBy VMHieu 31/03/2023
+         */
+        handleChange() {
+            let arrs = this.data;
+            let flag = 0;
+            if (this.data && this.$refs.input.placeholder && typeof (this.$refs.input.placeholder) == "string") {
+                for (const arr in arrs) {
+                    let str1 = removeVietnameseTones(arrs[arr][this.propText]).toLowerCase().replace(" ", "");
+                    let str2 = removeVietnameseTones(this.$refs.input.placeholder).toLowerCase().replace(" ", "");
+                    if (str1.includes(str2)) {
+                        flag++;
+                    }
+                }
+
+                if (flag == 0) {
+                    this.showError = true;
+                    this.isShowListData = false;
+                } else {
+                    this.showError = false;
+                }
+            } else {
+                this.showError = false;
+            }
+
+            if (this.$refs.input.placeholder == "") {
+                this.dataFilter = this.data;
+            }
+
+        },
+
+        /**
+         * Nhập text thì thực hiện filter dữ liệu và hiển thị
+         * CreatedBy VMHieu 01/04/2023
+         */
+        inputOnChange() {
+            var me = this;
+            // Thực hiện lọc các phần tử phù hợp trong data:
+            this.dataFilter = this.data.filter((e) => {
+                if (me.textInput) {
+                    this.clearIp = true;
+                    let text = removeVietnameseTones(me.textInput)
+                        .toLowerCase()
+                        .replace(" ", "");
+                    let textOfItem = removeVietnameseTones(e[me.propText])
+                        .toLowerCase()
+                        .replace(" ", "");
+                    return textOfItem.includes(text);
+                }
+            });
+
+            this.handleChange();
+
+            if (this.dataFilter.length > 0 || !me.textInput) {
+                this.isShowListData = true;
+            }
+        },
+
+        /**
+         * Lựa chọn item bằng cách nhấn các phím lên, xuống trên bàn phím
+         * CreatedBy VMHieu 01/04/2023
+         */
+        selecItemUpDown(event) {
+            var me = this;
+            var keyCodePress = event.keyCode;
+            var elToFocus = null;
+
+            switch (keyCodePress) {
+                case keyCode.ESC:
+                    this.isShowListData = false;
+                    break;
+                case keyCode.ArrowDown:
+                    this.isShowListData = true;
+                    if (!this.$refs.input.placeholder || this.$refs.input.placeholder.length == 0 || this.showError) {
+                        this.dataFilter = this.data;
+                    }
+                    elToFocus = this.$refs[`toFocus_${me.indexItemFocus + 1}`];
+                    if (
+                        this.indexItemFocus == null ||
+                        !elToFocus ||
+                        elToFocus.length == 0
+                    ) {
+                        this.indexItemFocus = 0;
+                    } else {
+                        this.indexItemFocus += 1;
+                    }
+                    break;
+                case keyCode.ArrowUp:
+                    this.isShowListData = true;
+                    if (!this.$refs.input.placeholder || this.$refs.input.placeholder.length == 0 || this.showError) {
+                        this.dataFilter = this.data;
+                    }
+                    elToFocus = this.$refs[`toFocus_${me.indexItemFocus - 1}`];
+                    if (
+                        this.indexItemFocus == null ||
+                        !elToFocus ||
+                        elToFocus.length == 0
+                    ) {
+                        this.indexItemFocus = this.dataFilter.length - 1;
+                    } else {
+                        this.indexItemFocus -= 1;
+                    }
+                    break;
+                case keyCode.Enter:
+                    elToFocus = this.$refs[`toFocus_${me.indexItemFocus}`];
+                    if (!this.$refs.input.placeholder) {
+                        this.dataFilter = this.data;
+                        this.isShowListData = !this.isShowListData;
+                    } else {
+                        if (this.dataFilter.length > 0) {
+                            this.isShowListData = !this.isShowListData;
+                        }
+                    }
+                    if (elToFocus && elToFocus.length > 0) {
+                        elToFocus[0].click();
+                        this.isShowListData = false;
+                        this.dataFilter = this.data
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
-    }
     },
 
     mounted() {
@@ -416,7 +393,7 @@ export default {
             this.$emit("update:modelValue", value);
         }
 
-        if (this.valueCombobox) {
+        if (this.valueCombobox != null) {
             let index = 0;
             for (let i = 0; i < this.data.length; i++) {
                 if (this.valueCombobox == this.data[i][this.propValue]) {
@@ -457,6 +434,10 @@ export default {
     background: #fff;
 }
 
+.disabled {
+    opacity: 0.6;
+}
+
 .combobox__input,
 select {
     width: 100%;
@@ -470,7 +451,7 @@ select {
     box-sizing: border-box;
     z-index: 10;
     font-family: GoogleSans;
-    font-size: 14px ;
+    font-size: 14px;
     cursor: pointer;
 }
 
@@ -478,21 +459,21 @@ select {
     outline: 1px solid #1a73e8;
 }
 
-.combobox__error>input{
+.combobox__error>input {
     outline: 1px solid #ef5350;
     border: none;
 }
 
-.combobox__error>input:focus{
+.combobox__error>input:focus {
     outline: 1px solid #ef5350;
 }
 
-.cbb-error:focus{
+.cbb-error:focus {
     border: none;
     outline: none;
 }
 
-.combobox-icon{
+.combobox-icon {
     position: absolute;
     right: 8px;
     top: 10px;
@@ -508,14 +489,14 @@ select {
     left: 0;
     border-radius: 4px;
     background-color: #fff;
-    box-shadow: 0 0 16px rgba(23,27,42,.24);
+    box-shadow: 0 0 16px rgba(23, 27, 42, .24);
     z-index: 999;
     /* max-height: 198px; */
     overflow: auto;
     width: -webkit-fill-available;
 }
 
-.combobox-top{
+.combobox-top {
     top: -450%;
 }
 
@@ -560,11 +541,11 @@ select {
     color: #8a6bf6;
 }
 
-.combobox__item--selected>div{
+.combobox__item--selected>div {
     display: block;
 }
 
-.combobox__item>span{
+.combobox__item>span {
     line-height: initial;
 }
 
@@ -572,46 +553,46 @@ select {
     display: none;
 }
 
-.combobox-error{
+.combobox-error {
     color: #ef5350;
     margin-top: 6px;
 }
 
-.combobox-question{
+.combobox-question {
     border: none;
     outline: none;
     font-weight: 500;
     font-size: 14px;
 }
 
-.combobox-question>input{
+.combobox-question>input {
     border: none;
     outline: none;
     background-color: #f8e373;
 }
 
-.combobox-question>input:focus{
+.combobox-question>input:focus {
     border: none;
     outline: none;
 }
 
-.combobox-question .combobox-icon{
+.combobox-question .combobox-icon {
     top: 8px;
 }
 
-.combobox-question input::placeholder{
+.combobox-question input::placeholder {
     font-weight: 700;
     font-size: 16px;
     opacity: 1;
     color: #000;
 }
 
-.combobox input::placeholder{
+.combobox input::placeholder {
     opacity: 1;
     color: #000;
 }
 
-.icon-clear img{
+.icon-clear img {
     width: 16px;
     height: 16px;
     opacity: 0.2;
@@ -619,12 +600,12 @@ select {
     align-items: center;
 }
 
-.icon-clear img:hover{
+.icon-clear img:hover {
     opacity: 0.4;
 }
 
 
-.icon-clear{
+.icon-clear {
     top: 12px;
 }
 </style>

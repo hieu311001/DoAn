@@ -37,6 +37,7 @@ export const Role = {
 export const StorageOrderStatus = {
     Processing: 0,
     Done: 1,
+    Cancel: 2
 }
 
 export default Enumeration;

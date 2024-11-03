@@ -31,7 +31,7 @@
                             <td>
                                 <BaseCounter v-model="product.Quantity" :valueInput="product.Quantity"></BaseCounter>
                             </td>
-                            <td>{{ formatPrice(product.Price * product.Quantity) }}</td>
+                            <td>{{ formatPrice(product.Price * product.Quantity * (1-product.Sale/100)) }}</td>
                             <td>
                                 <button @click="removeFromCart(product.ProductID)">Xóa</button>
                             </td>
@@ -74,7 +74,7 @@ const localCart = ref([...props.cart]);
 
 // Tính tổng tiền từ localCart
 const total = computed(() => {
-    return localCart.value.reduce((sum, product) => sum + (product.Price * product.Quantity), 0);
+    return localCart.value.reduce((sum, product) => sum + (product.Price * product.Quantity * (1-product.Sale/100)), 0);
 });
 
 // Format giá

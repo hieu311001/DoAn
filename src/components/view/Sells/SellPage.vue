@@ -78,7 +78,14 @@
                             </div>
                         </div>
                         <h3 class="product-name">{{ product.ProductName }}</h3>
-                        <p class="product-price">{{ formatNumber(product.Price) }}</p>
+                        <div class="product-price">
+                            <span :class="product.Sale ? 'sale' : ''">
+                                {{ formatNumber(product.Price) }} đ
+                            </span>
+                            <span v-if="product.Sale">
+                                {{ formatNumber(product.Price*(1-product.Sale/100)) }} đ
+                            </span>
+                        </div>
                         <button @click="addToCart(product)" class="add-to-cart-button">Thêm vào giỏ</button>
                     </div>
                 </div>
@@ -106,20 +113,24 @@ const dataCategory = [
         Value: ""
     },
     {
+        Text: "Mũ",
+        Value: 1
+    },
+    {
         Text: "Áo",
-        Value: ""
+        Value: 2
     },
     {
         Text: "Quần",
-        Value: ""
+        Value: 3
     },
     {
         Text: "Giày dép",
-        Value: ""
+        Value: 4
     },
     {
-        Text: "Đồ phượt",
-        Value: ""
+        Text: "Phụ kiện",
+        Value: 5
     },
 ]
 
@@ -372,6 +383,11 @@ const formatNumber = (number) => {
             text-align: left;
             font-size: 16px;
             color: #888;
+
+            .sale {
+                text-decoration: line-through;
+                margin-right: 12px;
+            }
         }
 
         .add-to-cart-button {
