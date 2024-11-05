@@ -11,44 +11,34 @@
                     </div>
                 </div>
             </div>
-            <div class="product-main flex">
-                <div class="product-image">
-                    <img :src="product.Image" :alt="product.ProductName" />
+            <div class="product-detail">
+                <div class="product-image" @click="selectImage">
+                    <img :src="product.Image" alt="Product Image" class="image-preview" />
+                    <input type="file" ref="refFile" @change="onImageChange" style="display: none;" disabled>
                 </div>
                 <div class="product-info">
-                    <h2>{{ product.ProductName }}</h2>
-                    <div class="product-price">
-                        <span :class="product.Sale ? 'sale' : ''">
-                            {{ formatNumber(product.Price) }} 
-                        </span>
-                        <span v-if="product.Sale">
-                            {{ formatNumber(product.Price * (1 - product.Sale / 100)) }} 
-                        </span>
+                    <div class="item">
+                        <h3>Tên sản phẩm:</h3>
+                        <input v-model="product.ProductName" type="text" class="m-input input-product" disabled>
                     </div>
-                    <p class="Description" v-html="product.Description"></p>
-                    <div class="add-cart" v-if="!isImport">
-                        <BaseCounter v-model="quantity"></BaseCounter>
-                        <button class="add-to-cart-button" @click="addToCart">Thêm vào giỏ</button>
+                    <div class="item">
+                        <h3>Giá:</h3>
+                        <input v-model.number="product.Price" type="number" class="m-input input-product" disabled />
                     </div>
-                    <div class="product-contact">
-                        <div class="store-info">
-                            <ul>
-                                <li>
-                                    <strong>Tư vấn Online, Ship hàng: 0963069*** (Zalo / Messenger)</strong>
-                                </li>
-                                <li>Freeship nội thành đơn từ <strong>1 triệu</strong>.</li>
-                                <li>
-                                    Freeship tỉnh đơn từ <strong>1 triệu</strong> nếu chuyển khoản trước
-                                    (Hỗ trợ ship tối đa <strong>70k</strong>).
-                                </li>
-                                <li>Mở cửa: <strong>8h30 - 22h</strong> tất cả các ngày.</li>
-                                <li>
-                                    <strong>Lưu ý:</strong> Giá các sản phẩm chưa bao gồm VAT.
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="item">
+                        <h3>Khuyến mãi (%):</h3>
+                        <input v-model.number="product.Sale" type="number" class="m-input input-product" disabled />
+                    </div>
+                    <div class="item">
+                        <h3>Số lượng tồn kho:</h3>
+                        <input v-model.number="product.TotalAmount" type="number" class="m-input input-product"
+                            disabled />
                     </div>
                 </div>
+            </div>
+            <div class="product-description">
+                <h3>Diễn giải:</h3>
+                <div v-html="product.Description" contenteditable="false" class="description-preview"></div>
             </div>
             <div class="product-bottom">
 
@@ -60,6 +50,7 @@
 <script setup>
 import BaseCounter from '@/components/base/BaseCounter.vue';
 import { ref, computed, watch, defineEmits, defineProps } from 'vue';
+import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'closeProduct', 'addToCart']);
 const props = defineProps({
@@ -70,13 +61,37 @@ const props = defineProps({
     },
 })
 
+const store = useStore();
+
+const product = computed(() => store.state.product.dataProductDetail);
+
 const quantity = ref(1);
+const refFile = ref(null);
 
 const formatNumber = (amount) => {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND'
     }).format(amount);
+};
+
+// Hàm chọn hình ảnh
+const selectImage = () => {
+    if (refFile.value) {
+        refFile.value.click();
+    }
+};
+
+// Hàm xử lý thay đổi hình ảnh
+const onImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            product.value.Image = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 };
 
 const closeProduct = () => {
@@ -102,9 +117,74 @@ const addToCart = () => {
     max-width: 80%;
     height: auto;
 
+    input:disabled {
+        opacity: 0.8;
+    }
+
+    .input-product {
+        max-height: 32px;
+        margin-top: 8px;
+    }
+
     .product-main {
         gap: 24px;
         align-items: flex-start;
+    }
+
+    .product-detail {
+        display: flex;
+        gap: 40px;
+        margin: 20px 0;
+    }
+
+    .description-preview {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .product-image {
+        height: 200px;
+        width: 300px;
+        flex: 1;
+        cursor: pointer;
+    }
+
+    .image-preview {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .product-info {
+        flex: 2;
+
+        .item {
+            margin-top: 12px;
+        }
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .product-description {
+        margin-top: 20px;
+    }
+
+    .description-area {
+        width: 100%;
+        height: 100px;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
     }
 
     .add-to-cart-button {

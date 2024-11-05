@@ -1,3 +1,6 @@
+import { constants } from "@/config";
+import axios from "axios";
+
 const state = {
     dataProductStores: [{
         StorageOrderID: 1,
@@ -35,15 +38,25 @@ const state = {
 }
 
 const mutations = {
-    setDataProductStore(state, payload) {
-        state.dataProductStores = payload;
-    }
+
 }
 
 const actions = {
-    setDataProductStore(context, data) {
-        context.commit("setDataProductStore", data);
-    }
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     * CreatedBy VMHieu 28/03/2023
+     */
+    async createStoreOrder(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/StorageOrder/store-order`, param)
+            if(res.data) {
+                alert("Thêm yêu cầu thành công");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
 }
 
 export default {

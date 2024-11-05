@@ -76,6 +76,7 @@
                             <div v-if="product.Sale > 0" class="Sale-badge">
                                 -{{ product.Sale }}%
                             </div>
+                            <div v-if="product.TotalAmount === 0" class="out-of-stock">Hết hàng</div>
                         </div>
                         <h3 class="product-name">{{ product.ProductName }}</h3>
                         <div class="product-price">
@@ -83,7 +84,7 @@
                                 {{ formatNumber(product.Price) }} đ
                             </span>
                             <span v-if="product.Sale">
-                                {{ formatNumber(product.Price*(1-product.Sale/100)) }} đ
+                                {{ formatNumber(product.Price * (1 - product.Sale / 100)) }} đ
                             </span>
                         </div>
                         <button @click="addToCart(product)" class="add-to-cart-button">Thêm vào giỏ</button>
@@ -196,8 +197,11 @@ const closeCart = (cart) => {
     showCart.value = false;
 }
 
-const closeProduct = () => {
+const closeProduct = (resetCart) => {
     showDetail.value = false;
+    if (resetCart) {
+        cart.value = [];
+    }
 }
 
 const addToCartDetail = (data) => {
@@ -240,6 +244,10 @@ const formatNumber = (number) => {
         maximumFractionDigits: 2, // Số chữ số thập phân tối đa
     }).format(number);
 };
+
+onMounted(() => {
+    store.dispatch('getAllProductSell', '00000000-0000-0000-0000-000000000000');
+})
 
 </script>
 
@@ -319,7 +327,7 @@ const formatNumber = (number) => {
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Đảm bảo có tối đa 4 cột */
             /* 4 sản phẩm mỗi hàng */
             gap: 20px;
         }
@@ -346,6 +354,21 @@ const formatNumber = (number) => {
             overflow: hidden;
             border-radius: 8px;
             /* Bo góc ảnh nếu cần */
+
+            .out-of-stock {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background-color: rgba(0, 0, 0, 0.7);
+                /* Semi-transparent background */
+                color: white;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-size: 16px;
+                font-weight: bold;
+                text-align: center;
+            }
         }
 
         .product-image {
@@ -377,6 +400,10 @@ const formatNumber = (number) => {
             text-align: left;
             font-size: 18px;
             margin: 10px 0;
+            overflow: hidden;
+    white-space: nowrap; /* Đảm bảo không xuống dòng */
+    text-overflow: ellipsis; /* Thêm dấu ... khi văn bản bị cắt */
+    max-height: 24px; /* Giới hạn chiều cao (điều chỉnh tùy thuộc vào font-size) */
         }
 
         .product-price {

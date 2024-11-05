@@ -106,7 +106,7 @@
 
                                 </td>
                                 <td>
-                                    <BaseButton class="m-button btn-white" text="Nhập hàng" @click="addToCart(product)">
+                                    <BaseButton class="m-button btn-white no-wrap" text="Nhập hàng" @click="addToCart(product)">
                                     </BaseButton>
                                 </td>
                             </tr>
@@ -116,8 +116,8 @@
             </div>
         </div>
         <ProductStorage :cart="cart" v-if="showCart" @updateCart="updateCart" @closeCart="closeCart"></ProductStorage>
-        <ProductDetailPage :product="productDetail" :isImport="true" v-if="showDetail" @closeProduct="closeProduct">
-        </ProductDetailPage>
+        <ProductStorageDetail :product="productDetail" :isImport="true" v-if="showDetail" @closeProduct="closeProduct">
+        </ProductStorageDetail>
     </div>
 </template>
 
@@ -128,6 +128,7 @@ import { useStore } from 'vuex';
 import CartPage from '../Sells/CartPage.vue';
 import ProductStorage from './ProductStorage.vue';
 import ProductDetailPage from '../Sells/ProductDetailPage.vue';
+import ProductStorageDetail from './ProductStorageDetail.vue';
 
 const showFilter = ref(false);
 
@@ -207,7 +208,7 @@ const openCart = () => {
 }
 
 const viewProductDetail = (product) => {
-    productDetail.value = product;
+    store.dispatch('getProductByID', product.ProductID);
     showDetail.value = true;
 };
 
@@ -215,8 +216,11 @@ const updateCart = (cartData) => {
     cart.value = cartData;
 }
 
-const closeCart = (cart) => {
+const closeCart = (resetCart) => {
     showCart.value = false;
+    if (resetCart) {
+        cart.value = [];
+    }
 }
 
 const closeProduct = () => {
@@ -243,6 +247,7 @@ const handleCloseFilter = () => {
 const addToCart = (product) => {
     const existingProduct = cart.value.find(item => item.ProductID === product.ProductID);
     if (!existingProduct) {
+        product.Quantity = 1;
         cart.value.push({ ...product, selected: false });
     }
 };
@@ -253,6 +258,10 @@ const formatNumber = (number) => {
         maximumFractionDigits: 2, // Số chữ số thập phân tối đa
     }).format(number);
 };
+
+onMounted(() => {
+    store.dispatch('getAllProduct', '00000000-0000-0000-0000-000000000000');
+})
 
 </script>
 

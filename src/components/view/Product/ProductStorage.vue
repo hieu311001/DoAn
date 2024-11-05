@@ -6,7 +6,7 @@
                     <h2>Nhập hàng</h2>
                 </div>
                 <div class="title-right">
-                    <div class="icon-close" @click="closeCart">
+                    <div class="icon-close" @click="closeCart(false)">
                         <icon class="icon icon-exit"></icon>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
                     <div class="filter-btn__close">
-                        <BaseButton class="m-button btn-white" text="Tạo yêu cầu" @click="checkout">
+                        <BaseButton class="m-button btn-white" text="Tạo yêu cầu" @click="createStoreOrder">
                         </BaseButton>
                     </div>
                 </div>
@@ -51,11 +51,15 @@
 
 <script setup>
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
+import { generateGUID } from '@/common/commonFn';
+import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeCart']);
 const props = defineProps({
     cart: null, // Data mà component cha gửi xuống
-})
+});
+
+const store = useStore();
 
 const promoCode = ref('');
 const customer = ref({
@@ -67,20 +71,6 @@ const customer = ref({
 // Tạo một biến local để lưu trữ cart
 const localCart = ref([...props.cart]);
 
-// Tính tổng tiền từ localCart
-const total = computed(() => {
-    return localCart.value.reduce((sum, product) => sum + (product.Price * product.Quantity), 0);
-});
-
-// Format giá
-const formatPrice = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
-
-const updateTotal = () => {
-    // Logic to update total if needed, already handled by computed property
-};
-
 const removeFromCart = (productId) => {
     const index = localCart.value.findIndex(product => product.ProductID === productId);
     if (index !== -1) {
@@ -89,23 +79,41 @@ const removeFromCart = (productId) => {
     }
 };
 
-const applyPromo = () => {
-    // Logic để áp dụng mã khuyến mãi nếu có
-    alert(`Mã khuyến mãi "${promoCode.value}" đã được áp dụng!`);
+const createStoreOrder = () => {
+    if (localCart.value.length <= 0) {
+        alert('Không có sản phẩm nào');
+        return;
+    }
+
+    let storageOrderID = generateGUID();
+    let paramMaster = {
+        StorageOrderID: storageOrderID,
+        StoreID: '8101bb84-99e2-11ef-a88b-02508d4f66ec',
+        CreateDate: new Date(),
+        Status: 0
+    }
+
+    let paramDetail = [];
+
+    localCart.value.forEach(item => {
+        paramDetail.push({
+            StorageOrderDetailID: generateGUID(),
+            StorageOrderID: storageOrderID,
+            ProductID: item.ProductID,
+            Amount: item.Quantity
+        })
+    })
+
+    store.dispatch('createStoreOrder', {
+        storeOrder: paramMaster,
+        storeOrderDetails: paramDetail,
+    });   
+
+    closeCart(true);
 };
 
-const checkout = () => {
-    // Logic thanh toán
-    alert(`Thông tin khách hàng: ${customer.value.name}, ${customer.value.phone}, ${customer.value.email}`);
-};
-
-const printInvoice = () => {
-    // Logic in hóa đơn
-    alert('In hóa đơn...');
-};
-
-const closeCart = () => {
-    emit('closeCart');
+const closeCart = (resetCart) => {
+    emit('closeCart', resetCart);
 }
 </script>
 

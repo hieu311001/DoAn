@@ -84,6 +84,10 @@ strong{
     background-color: #fff;
 }
 
+.no-wrap {
+    white-space: nowrap;
+}
+
 .asterik{
     color: #e54848;
 }

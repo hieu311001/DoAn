@@ -6,7 +6,7 @@
                     <h2>Giỏ hàng hiện tại</h2>
                 </div>
                 <div class="title-right">
-                    <div class="icon-close" @click="closeCart">
+                    <div class="icon-close" @click="closeCart(false)">
                         <icon class="icon icon-exit"></icon>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                             <td>
                                 <BaseCounter v-model="product.Quantity" :valueInput="product.Quantity"></BaseCounter>
                             </td>
-                            <td>{{ formatPrice(product.Price * product.Quantity * (1-product.Sale/100)) }}</td>
+                            <td>{{ formatPrice(product.Price * product.Quantity * (1 - product.Sale / 100)) }}</td>
                             <td>
                                 <button @click="removeFromCart(product.ProductID)">Xóa</button>
                             </td>
@@ -41,11 +41,61 @@
                 <div class="total">
                     <strong>Tổng tiền:</strong> {{ formatPrice(total) }}
                 </div>
+                <div class="mt-3 info-pay">
+                    <div class="pay-info">
+                        <div class="flex gap-8">
+                            <div class="label-item">
+                                <div class="label">
+                                    Họ và tên:
+                                </div>
+                                <div class="input">
+                                    <input v-model="customer.Name" type="text" class="m-input input-product" />
+                                </div>
+                            </div>
+                            <div class="label-item">
+                                <div class="label">
+                                    SĐT:
+                                </div>
+                                <div class="input">
+                                    <input  v-model="customer.Phone" type="text" class="m-input input-product" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-8 mt-3">
+                            <div class="label-item">
+                                <div class="label">
+                                    Địa chỉ:
+                                </div>
+                                <div class="input">
+                                    <input v-model="customer.Address" type="text" class="m-input input-product" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pay-option mt-3">
+                        <div class="radio-group">
+                            <label class="radio-container">
+                                <input v-model="paymentMethod" type="radio" name="option" value="0" />
+                                <span class="radio-label">Thanh toán khi nhận hàng</span>
+                            </label>
+                            <label class="radio-container">
+                                <input v-model="paymentMethod" type="radio" name="option" value="1" />
+                                <span class="radio-label">Thanh toán online</span>
+                            </label>
+                        </div>
+                        <div class="qr-pay mt-2 flex gap-8" v-if="paymentMethod == 1">
+                            <div class="text">Vui lòng quét mã để thanh toán</div>
+                            <div class="qr-image">
+                                <img width="160" height="160" src="" class="" alt="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
                     <div class="filter-btn__close">
-                        <BaseButton class="m-button btn-white" text="Tạo đơn hàng" @click="checkout">
+                        <BaseButton class="m-button btn-white" text="Tạo đơn hàng" @click="createOrder">
                         </BaseButton>
                     </div>
                 </div>
@@ -55,6 +105,8 @@
 </template>
 
 <script setup>
+import { useStore } from 'vuex';
+import { generateGUID } from '@/common/commonFn';
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeCart']);
@@ -64,26 +116,26 @@ const props = defineProps({
 
 const promoCode = ref('');
 const customer = ref({
-    name: '',
-    phone: '',
-    email: ''
+    Name: '',
+    Phone: '',
+    Address: ''
 });
+
+const store = useStore();
+
+const paymentMethod = ref(0);
 
 // Tạo một biến local để lưu trữ cart
 const localCart = ref([...props.cart]);
 
 // Tính tổng tiền từ localCart
 const total = computed(() => {
-    return localCart.value.reduce((sum, product) => sum + (product.Price * product.Quantity * (1-product.Sale/100)), 0);
+    return localCart.value.reduce((sum, product) => sum + (product.Price * product.Quantity * (1 - product.Sale / 100)), 0);
 });
 
 // Format giá
 const formatPrice = (amount) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-};
-
-const updateTotal = () => {
-    // Logic to update total if needed, already handled by computed property
 };
 
 const removeFromCart = (productId) => {
@@ -94,23 +146,48 @@ const removeFromCart = (productId) => {
     }
 };
 
-const applyPromo = () => {
-    // Logic để áp dụng mã khuyến mãi nếu có
-    alert(`Mã khuyến mãi "${promoCode.value}" đã được áp dụng!`);
+const createOrder = () => {
+    if (localCart.value.length <= 0) {
+        alert('Không có sản phẩm nào');
+        return;
+    }
+
+    let productOrderID = generateGUID();
+    let paramMaster = {
+        ProductOrderID: productOrderID,
+        UserID: generateGUID(),
+        FullName: customer.value.Name,
+        PhoneNumber: customer.value.Phone,
+        Address: customer.value.Address,
+        TotalPrice: total.value,
+        PaymentMethod: paymentMethod.value,
+        StoreID: '8101bb84-99e2-11ef-a88b-02508d4f66ec',
+        OrderDate: new Date(),
+        Status: 0
+    }
+
+    let paramDetail = [];
+
+    localCart.value.forEach(item => {
+        paramDetail.push({
+            ProductOrderDetailID: generateGUID(),
+            ProductOrderID: productOrderID,
+            ProductID: item.ProductID,
+            Amount: item.Quantity,
+            Price: item.Price * item.Quantity * (1 - item.Sale / 100)
+        })
+    })
+
+    store.dispatch('createOrder', {
+        productOrder: paramMaster,
+        productOrderDetails: paramDetail,
+    });
+    
+    closeCart(true);
 };
 
-const checkout = () => {
-    // Logic thanh toán
-    alert(`Thông tin khách hàng: ${customer.value.name}, ${customer.value.phone}, ${customer.value.email}`);
-};
-
-const printInvoice = () => {
-    // Logic in hóa đơn
-    alert('In hóa đơn...');
-};
-
-const closeCart = () => {
-    emit('closeCart');
+const closeCart = (resetCart) => {
+    emit('closeCart', resetCart);
 }
 </script>
 
@@ -128,7 +205,7 @@ const closeCart = () => {
     .filter-bot {
         justify-content: flex-end;
         padding-top: 12px;
-    }
+    } 
 
     .product-image {
         width: 50px;
@@ -137,6 +214,20 @@ const closeCart = () => {
         /* Đảm bảo ảnh lấp đầy container mà không bị méo */
         border-radius: inherit;
         /* Giữ bo góc giống container */
+    }
+
+    .cart-content {
+        max-height: 70vh;
+        overflow: auto;
+    }
+
+    .label-item {
+        flex: 1;
+        
+        .label {
+            font-size: 16px;
+            font-weight: 600;
+        }
     }
 }
 
@@ -178,4 +269,57 @@ td {
         padding: 0 12px;
     }
 }
+
+.radio-group {
+    display: flex;
+    gap: 20px; /* Khoảng cách giữa các nút radio */
+}
+
+.radio-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    position: relative;
+}
+
+.radio-container input[type="radio"] {
+    display: none; /* Ẩn radio gốc */
+}
+
+.radio-label {
+    position: relative;
+    padding-left: 24px; /* Khoảng cách cho nút radio tùy chỉnh */
+    cursor: pointer;
+}
+
+.radio-label::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid #007bff; /* Màu viền của radio */
+    border-radius: 50%;
+    background-color: #fff; /* Màu nền */
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.radio-container input[type="radio"]:checked + .radio-label::before {
+    border-color: #007bff; /* Màu viền khi được chọn */
+}
+
+.radio-container input[type="radio"]:checked + .radio-label::after {
+    content: "";
+    position: absolute;
+    left: 4px; /* Căn giữa vòng tròn nhỏ bên trong */
+    top: calc(50% - 4px);
+    width: 8px;
+    height: 8px;
+    background-color: #007bff; /* Màu vòng tròn nhỏ bên trong */
+    border-radius: 50%;
+}
+
 </style>

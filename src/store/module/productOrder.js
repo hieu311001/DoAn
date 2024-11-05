@@ -1,3 +1,6 @@
+import { constants } from "@/config";
+import axios from "axios";
+
 const state = {
     dataProductOrders: [{
             ProductOrderID: 1,
@@ -190,15 +193,25 @@ const state = {
 }
 
 const mutations = {
-    setDataProductOrder(state, payload) {
-        state.dataProductOrders = payload;
-    }
+
 }
 
 const actions = {
-    setDataProductOrder(context, data) {
-        context.commit("setDataProductOrder", data);
-    }
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     * CreatedBy VMHieu 28/03/2023
+     */
+    async createOrder(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/ProductOrder/order`, param)
+            if(res.data) {
+                alert("Thêm đơn hàng thành công");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
 }
 
 export default {

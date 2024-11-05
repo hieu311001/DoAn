@@ -28,6 +28,10 @@ const decrease = () => {
     }
 };
 
+watch(() => quantity.value, () => {
+    emit("update:modelValue", Number(quantity.value));
+})
+
 onMounted(() => {
     if (props.valueInput) {
         quantity.value = props.valueInput;
