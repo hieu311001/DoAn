@@ -246,7 +246,7 @@ const formatNumber = (number) => {
 };
 
 onMounted(() => {
-    store.dispatch('getAllProductSell', '00000000-0000-0000-0000-000000000000');
+    store.dispatch('getAllProductSell', '80ff566d-99e2-11ef-a88b-02508d4f66ec');
 })
 
 </script>

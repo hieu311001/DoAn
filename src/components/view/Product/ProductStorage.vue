@@ -36,6 +36,18 @@
                         </tr>
                     </tbody>
                 </table>
+                <div class="note">
+                    <div class="mt-3">
+                        <div class="label-item">
+                            <div class="label">
+                                Ghi chú:
+                            </div>
+                            <div class="input">
+                                <input v-model="note" type="text" class="m-input input-product" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
@@ -61,12 +73,7 @@ const props = defineProps({
 
 const store = useStore();
 
-const promoCode = ref('');
-const customer = ref({
-    name: '',
-    phone: '',
-    email: ''
-});
+const note = ref();
 
 // Tạo một biến local để lưu trữ cart
 const localCart = ref([...props.cart]);
@@ -90,7 +97,8 @@ const createStoreOrder = () => {
         StorageOrderID: storageOrderID,
         StoreID: '8101bb84-99e2-11ef-a88b-02508d4f66ec',
         CreateDate: new Date(),
-        Status: 0
+        Status: 0,
+        Note: note.value
     }
 
     let paramDetail = [];
@@ -107,7 +115,7 @@ const createStoreOrder = () => {
     store.dispatch('createStoreOrder', {
         storeOrder: paramMaster,
         storeOrderDetails: paramDetail,
-    });   
+    });
 
     closeCart(true);
 };

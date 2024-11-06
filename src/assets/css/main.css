@@ -92,6 +92,10 @@ strong{
     color: #e54848;
 }
 
+button:disabled {
+    opacity: 0.6;
+}
+
 .flex {
     display: flex;
     align-items: center;

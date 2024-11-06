@@ -13,9 +13,9 @@
             </div>
 
             <div class="store-info">
-                <p><strong>Tên cửa hàng:</strong> {{ productStoreDetail.StoreName }}</p>
-                <p><strong>Ngày tạo:</strong> {{ formatDate(productStoreDetail.CreateDate) }}</p>
-                <p><strong>Ghi chú:</strong> {{ productStoreDetail.Note }}</p>
+                <p><strong>Tên cửa hàng:</strong> {{ productStorageOrder.StoreName }}</p>
+                <p><strong>Ngày tạo:</strong> {{ formatDate(productStorageOrder.CreateDate) }}</p>
+                <p><strong>Ghi chú:</strong> {{ productStorageOrder.Note }}</p>
             </div>
 
             <div class="product-list">
@@ -31,7 +31,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in productStoreDetail.Products" :key="product.ProductID">
+                            <tr v-for="product in productStoreDetail" :key="product.ProductID">
                                 <td style="text-align: center">
                                     <img :src="product.Image" alt="Product Image" class="product-image"/>
                                 </td>
@@ -46,11 +46,11 @@
 
             <div class="order-status flex">
                 <p><strong>Trạng Thái:</strong></p>
-                <BaseCombobox id="category" :disabled="!isEdit" propValue="Value" propText="Text" :data=orderStatus
-                    :valueCombobox="productStoreDetail.Status" @getValueCombobox="getDataCombobox" />
+                <BaseCombobox id="category" :disabled="true" propValue="Value" propText="Text" :data=orderStatus
+                    :valueCombobox="productStorageOrder.Status" @getValueCombobox="getDataCombobox" />
             </div>
 
-            <div class="order-footer" v-if="isEdit">
+            <div class="order-footer" v-if="isEdit && productStorageOrder.Status == 0">
                 <div class="filter-bot flex gap-8">
                     <BaseButton class="m-button btn-blue" text="Duyệt yêu cầu" @click="acceptRequest">
                     </BaseButton>
@@ -73,11 +73,18 @@ const props = defineProps({
         type: Boolean,
         default: true
     }, // Data mà component cha gửi xuống
+    productStorageOrder: {
+        type: Object,
+        default: null
+    }
 })
 
 const store = useStore();
 
-const productStoreDetail = computed(() => store.state.productStore.dataProductStoreDetail);
+const productStoreDetail = computed(() => store.state.storageOrder.dataStorageOrderDetail);
+
+// Tạo một biến local để lưu trữ cart
+const productStorageOrder = ref(props.productStorageOrder);
 
 const orderStatus = [
     {
@@ -85,7 +92,7 @@ const orderStatus = [
         Value: 0
     },
     {
-        Text: "Đã hoàn thành",
+        Text: "Đã xử lý",
         Value: 1
     },
     {
@@ -96,16 +103,36 @@ const orderStatus = [
 
 const status = ref('Đang xử lý');
 
-const acceptRequest = () => {
-    alert(`Trạng thái đơn hàng đã được cập nhật: ${status.value}`);
+const acceptRequest = async () => {
+    let flag = true;
+    productStoreDetail.value.forEach(item => {
+        if (item.Amount > item.TotalAmount) {
+            alert("Số lượng sản phẩm trong kho không đủ");
+            flag = false;
+            return;
+        }
+    })
+
+    if (!flag) {
+        return;
+    }
+
+    await store.dispatch('acceptStorageOrder', {StorageOrderID: productStorageOrder.value.StorageOrderID});
+
+    closeOrderDetail(true);
 };
 
-const cancelOrder = () => {
-    alert('Đơn hàng đã bị hủy.');
+const cancelRequest = async () => {
+    await store.dispatch('updateStorageOrder', {
+        ...productStorageOrder.value,
+        Status: 2
+    });
+
+    closeOrderDetail(true);
 };
 
-const closeOrderDetail = () => {
-    emit('closeOrderDetail');
+const closeOrderDetail = (reload) => {
+    emit('closeOrderDetail', reload);
 }
 </script>
 

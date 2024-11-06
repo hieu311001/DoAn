@@ -14,36 +14,53 @@
 
             <div class="customer-info">
                 <h3>Khách Hàng</h3>
-                <p><strong>Tên khách hàng:</strong> Nguyễn Văn A</p>
-                <p><strong>Số điện thoại:</strong> 0901234567</p>
-                <p><strong>Địa chỉ giao hàng:</strong> 123 Đường ABC, Phường XYZ, Quận 1, TP.HCM</p>
+                <p><strong>Tên khách hàng:</strong> {{ productOrder.FullName }}</p>
+                <p><strong>Số điện thoại:</strong> {{ productOrder.PhoneNumber }}</p>
+                <p><strong>Địa chỉ giao hàng:</strong> {{ productOrder.Address }}</p>
             </div>
 
             <div class="order-summary">
                 <h3>Thông Tin Đơn Hàng</h3>
-                <p><strong>Ngày tạo:</strong> 30/10/2024</p>
-                <p><strong>Phương thức thanh toán:</strong> Tiền mặt</p>
-                <p><strong>Tổng giá trị:</strong> 2.000.000 VND</p>
+                <p><strong>Ngày tạo:</strong> {{ formatDate(productOrder.OrderDate) }}</p>
+                <p><strong>Phương thức thanh toán:</strong> {{ getValueEnum(productOrder.PaymentMethod, "PaymentMethod")
+                    }}</p>
+                <p><strong>Tổng giá trị:</strong> {{ formatNumber(productOrder.TotalPrice) }}</p>
             </div>
 
             <div class="order-products">
                 <h3>Sản Phẩm Trong Đơn</h3>
-                <ul>
-                    <li>Balo leo núi XYZ <span>x2</span> 500.000 VND</li>
-                    <li>Lều cắm trại ABC <span>x1</span> 1.000.000 VND</li>
-                </ul>
-                <p class="total"><strong>Tổng cộng:</strong> 2.000.000 VND</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sản Phẩm</th>
+                            <th>Số Lượng</th>
+                            <th>Giá</th>
+                            <th>Giảm Giá (%)</th>
+                            <th>Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="product in productOrderDetail" :key="product.ProductID">
+                            <td>{{ product.ProductName }}</td>
+                            <td>{{ product.Amount }}</td>
+                            <td>{{ formatNumber(product.Price) }}</td>
+                            <td>{{ product.Sale || 0 }}</td>
+                            <td>{{ formatNumber(product.Price * product.Amount * (1 - product.Sale / 100)) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
             <div class="order-status flex">
                 <p><strong>Trạng Thái Đơn Hàng:</strong></p>
-                <BaseCombobox id="category" :disabled="!isEdit" propValue="Value" propText="Text"
-                :valueCombobox="0" :data=orderStatus @getValueCombobox="getDataCombobox" :resetValue="resetValue" />
+                <BaseCombobox id="category" :disabled="!isEdit || productOrder.Status == 2 || productOrder.Status == 3" propValue="Value" propText="Text"
+                    :valueCombobox="productOrder.Status" v-model="productOrder.Status" :data=orderStatus @getValueCombobox="getDataCombobox"
+                    :resetValue="resetValue"/>
             </div>
 
-            <div class="order-footer" v-if="isEdit">
+            <div class="order-footer" v-if="isEdit && productOrder.Status != 2 && productOrder.Status != 3">
                 <div class="filter-bot flex gap-8">
-                    <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder">
+                <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder" :disabled="productOrder.Status == 2 || productOrder.Status == 3">
                     </BaseButton>
                 </div>
             </div>
@@ -52,7 +69,9 @@
 </template>
 
 <script setup>
+import { formatDate, getValueEnum } from '@/common/commonFn';
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
+import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeOrderDetail']);
 const props = defineProps({
@@ -60,7 +79,18 @@ const props = defineProps({
         type: Boolean,
         default: true
     }, // Data mà component cha gửi xuống
+    productOrder: {
+        type: Object,
+        default: null
+    }
 })
+
+const store = useStore();
+
+const productOrderDetail = computed(() => store.state.productOrder.dataProductOrderDetail);
+
+// Tạo một biến local để lưu trữ cart
+const productOrder = ref(props.productOrder);
 
 const orderStatus = [
     {
@@ -84,16 +114,27 @@ const orderStatus = [
 const status = ref('Đang xử lý');
 
 const updateOrder = () => {
-    alert(`Trạng thái đơn hàng đã được cập nhật: ${status.value}`);
-};
-
-const cancelOrder = () => {
-    alert('Đơn hàng đã bị hủy.');
+    if (productOrder.value.Status == 2 || productOrder.value.Status == 3) {
+        return;
+    }
+    store.dispatch('updateOrder', {
+        ...productOrder.value,
+        Status: productOrder.value.Status
+    });
+    closeOrderDetail();
 };
 
 const closeOrderDetail = () => {
     emit('closeOrderDetail');
 }
+
+const formatNumber = (number) => {
+    return new Intl.NumberFormat('vi-VN', {
+        minimumFractionDigits: 0, // Số chữ số thập phân tối thiểu
+        maximumFractionDigits: 2, // Số chữ số thập phân tối đa
+    }).format(number);
+};
+
 </script>
 
 <style lang="scss" scoped>
@@ -110,7 +151,6 @@ const closeOrderDetail = () => {
 .order-info,
 .customer-info,
 .order-summary,
-.order-products,
 .order-status,
 .buttons {
     margin-bottom: 12px;
@@ -126,29 +166,53 @@ const closeOrderDetail = () => {
 .order-info,
 .customer-info,
 .order-summary,
-.order-products,
 .order-status {
     padding-top: 8px;
 }
 
 .customer-info h3,
-.order-summary h3,
-.order-products h3 {
+.order-summary h3 {
     font-size: 16px;
     font-weight: bold;
     margin-bottom: 8px;
     border-bottom: 1px solid #ddd;
 }
 
-.order-products ul {
-    list-style-type: none;
-    padding: 0;
-}
+.order-products {
+    margin-top: 16px;
 
-.order-products li {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
+    h3 {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+    }
+
+    th,
+    td {
+        padding: 8px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f8f8f8;
+        font-weight: bold;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
 }
 
 .order-status {

@@ -78,7 +78,7 @@ import BaseButton from '@/components/base/button/BaseButton.vue';
 import { ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { formatDate, getValueEnum } from '@/common/commonFn';
-import ProductStorageDetail from '../ProductStore/ProductStorageDetail.vue';
+import ProductStorageDetail from '../ProductStore/StorageOrderDetail.vue';
 import ProductOrderDetail from '../ProductOrder/ProductOrderDetail.vue';
 
 const activeTab = ref('orders');
@@ -90,7 +90,7 @@ const hoveredProductId = ref(null);
 
 const store = useStore();
 const productOrders = computed(() => store.state.productOrder.dataProductOrders);
-const productStorages = computed(() => store.state.productStore.dataProductStores);
+const productStorages = computed(() => store.state.storageOrder.dataStorageOrders);
 
 const showContent = (tab) => {
     activeTab.value = tab;

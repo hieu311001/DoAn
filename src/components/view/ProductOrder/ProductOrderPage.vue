@@ -82,7 +82,7 @@
                                 :class="{ 'row-hover': hoveredProductId === product.ProductOrderID }">
                                 <td>{{ product.FullName }}</td>
                                 <td>{{ formatDate(product.OrderDate) }}</td>
-                                <td>{{ formatNumber(product.TotalAmount) }} đ</td>
+                                <td>{{ formatNumber(product.TotalPrice) }} đ</td>
                                 <td>{{ getValueEnum(product.PaymentMethod, "PaymentMethod") }}</td>
                                 <td>{{ getValueEnum(product.Status, "ProductOrderStatus") }}</td>
                                 <td>
@@ -102,7 +102,7 @@
                 <strong>Tổng số:</strong> {{ productOrders.length }} đơn hàng
             </div>
         </div>
-        <ProductOrderDetail v-if="showDetail" @closeOrderDetail="closeOrderDetail">
+        <ProductOrderDetail v-if="showDetail" @closeOrderDetail="closeOrderDetail" :productOrder="productOrder">
         </ProductOrderDetail>
     </div>
 </template>
@@ -176,6 +176,8 @@ const store = useStore();
 
 const productOrders = computed(() => store.state.productOrder.dataProductOrders);
 
+const productOrder = ref(null);
+
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
 const cart = ref([]);
@@ -186,28 +188,15 @@ const productDetail = ref(null);
 // Quản lý trạng thái hover và popup
 const hoveredProductId = ref(null);
 
-const openCart = () => {
-    showCart.value = true;
-}
-
-const viewProductDetail = (product) => {
-    productDetail.value = product;
+const viewProductDetail = async (product) => {
+    productOrder.value = product;
+    await store.dispatch('getOrderDetail', product.ProductOrderID);
     showDetail.value = true;
 };
-
-const updateCart = (cartData) => {
-    cart.value = cartData;
-}
 
 const closeOrderDetail = () => {
     showDetail.value = false;
 }
-
-const getStatus = (stock) => (stock === 0 ? 'Hết hàng' : stock <= 15 ? 'Sắp hết' : 'Còn hàng');
-
-const getStatusClass = (stock) => {
-    return stock === 0 ? 'out-of-stock' : stock <= 15 ? 'low-stock' : 'in-stock';
-};
 
 const handleToggleFilter = () => {
     let posBtn = refFilterBtn.value.getBoundingClientRect();
@@ -220,19 +209,16 @@ const handleCloseFilter = () => {
     showFilter.value = false;
 }
 
-const addToCart = (product) => {
-    const existingProduct = cart.value.find(item => item.ProductOrderID === product.ProductOrderID);
-    if (!existingProduct) {
-        cart.value.push({ ...product, selected: false });
-    }
-};
-
 const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN', {
         minimumFractionDigits: 0, // Số chữ số thập phân tối thiểu
         maximumFractionDigits: 2, // Số chữ số thập phân tối đa
     }).format(number);
 };
+
+onMounted(() => {
+    store.dispatch('getOrder', '8101bb84-99e2-11ef-a88b-02508d4f66ec');
+})
 
 </script>
 

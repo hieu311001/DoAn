@@ -68,17 +68,19 @@
                             <tr class="fix-row">
                                 <th>Tên cửa hàng</th>
                                 <th>Ngày tạo</th>
+                                <th>Ghi chú</th>
                                 <th>Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in productStorages" :key="product.ProductID"
+                            <tr v-for="product in storageOrders" :key="product.StorageOrderID"
                                 @dblclick="viewProductDetail(product)"
-                                @mouseenter="hoveredProductId = product.ProductID" @mouseleave="hoveredProductId = null"
-                                :class="{ 'row-hover': hoveredProductId === product.ProductID }">
+                                @mouseenter="hoveredProductId = product.StorageOrderID" @mouseleave="hoveredProductId = null"
+                                :class="{ 'row-hover': hoveredProductId === product.StorageOrderID }">
                                 <td>{{ product.StoreName }}</td>
                                 <td>{{ formatDate(product.CreateDate) }}</td>
+                                <td>{{ product.Note }}</td>
                                 <td>{{ getValueEnum(product.Status, "StorageOrderStatus") }}</td>
                                 <td>
                                     <div class="edit pointer" @click="viewProductDetail(product)" title="Cập nhật">
@@ -95,7 +97,7 @@
                 </div>
             </div>
         </div>
-        <ProductStorageDetail :product="productDetail" :isImport="true" v-if="showDetail" @closeOrderDetail="closeProduct">
+        <ProductStorageDetail :productStorageOrder="storageOrder" :isImport="true" v-if="showDetail" @closeOrderDetail="closeProduct">
         </ProductStorageDetail>
     </div>
 </template>
@@ -104,7 +106,7 @@
 import { openModal } from '@/utils/modalStore';
 import { ref, onMounted, onUpdated, computed, watch, reactive, onBeforeMount, watchEffect } from 'vue';
 import { useStore } from 'vuex';
-import ProductStorageDetail from './ProductStorageDetail.vue';
+import ProductStorageDetail from './StorageOrderDetail.vue';
 import { getValueEnum, formatDate } from '@/common/commonFn';
 
 const showFilter = ref(false);
@@ -168,22 +170,26 @@ const dataPrice = [
 
 const store = useStore();
 
-const productStorages = computed(() => store.state.productStore.dataProductStores);
+const storageOrders = computed(() => store.state.storageOrder.dataStorageOrders);
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
 const showDetail = ref(false);
-const productDetail = ref(null);
+const storageOrder = ref(null);
 
 // Quản lý trạng thái hover và popup
 const hoveredProductId = ref(null);
 
-const viewProductDetail = (product) => {
-    productDetail.value = product;
+const viewProductDetail = async (product) => {
+    storageOrder.value = product;
+    await store.dispatch('getStorageOrderDetail', product.StorageOrderID);
     showDetail.value = true;
 };
 
-const closeProduct = () => {
+const closeProduct = (reload) => {
+    if (reload) {
+        store.dispatch('getAllStorageOrder', '00000000-0000-0000-0000-000000000000');
+    }
     showDetail.value = false;
 }
 
@@ -197,6 +203,10 @@ const handleToggleFilter = () => {
 const handleCloseFilter = () => {
     showFilter.value = false;
 }
+
+onMounted(() => {
+    store.dispatch('getAllStorageOrder', '00000000-0000-0000-0000-000000000000');
+})
 </script>
 
 <style lang="scss" scoped>

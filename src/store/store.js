@@ -4,6 +4,7 @@ import sell from "./module/sell";
 import product from "./module/product";
 import productOrder from "./module/productOrder";
 import productStore from "./module/productStore";
+import storageOrder from "./module/storageOrder";
 
 export default createStore({
     modules: {
@@ -11,6 +12,7 @@ export default createStore({
         sell,
         product,
         productOrder,
-        productStore
+        productStore,
+        storageOrder
     }
 })

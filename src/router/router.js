@@ -6,7 +6,7 @@ import TheHome from '@/components/view/Home/TheHome';
 import SellPage from '@/components/view/Sells/SellPage';
 import ProductPage from '@/components/view/Product/ProductPage.vue';
 import ProductOrderPage from '@/components/view/ProductOrder/ProductOrderPage.vue';
-import ProductStoragePage from '@/components/view/ProductStore/ProductStoragePage.vue';
+import StorageOrderPage from '@/components/view/ProductStore/StorageOrderPage.vue';
 import HistoryPage from '@/components/view/History/HistoryPage.vue';
 
 const routes = [
@@ -55,11 +55,11 @@ const routes = [
     },
   },
   {
-    path: '/product-store',
-    name: 'product-store',
+    path: '/store-order',
+    name: 'store-order',
     components: {
-      default: ProductStoragePage,
-      content: ProductStoragePage, 
+      default: StorageOrderPage,
+      content: StorageOrderPage, 
     },
   },
   {
