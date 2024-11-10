@@ -53,14 +53,14 @@
 
             <div class="order-status flex">
                 <p><strong>Trạng Thái Đơn Hàng:</strong></p>
-                <BaseCombobox id="category" :disabled="!isEdit || productOrder.Status == 2 || productOrder.Status == 3" propValue="Value" propText="Text"
+                <BaseCombobox id="category" :disabled="!isEdit || isNotChange" propValue="Value" propText="Text"
                     :valueCombobox="productOrder.Status" v-model="productOrder.Status" :data=orderStatus @getValueCombobox="getDataCombobox"
                     :resetValue="resetValue"/>
             </div>
 
-            <div class="order-footer" v-if="isEdit && productOrder.Status != 2 && productOrder.Status != 3">
+            <div class="order-footer" v-if="isEdit && !isNotChange">
                 <div class="filter-bot flex gap-8">
-                <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder" :disabled="productOrder.Status == 2 || productOrder.Status == 3">
+                <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder" :disabled="isNotChange">
                     </BaseButton>
                 </div>
             </div>
@@ -70,7 +70,7 @@
 
 <script setup>
 import { formatDate, getValueEnum } from '@/common/commonFn';
-import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
+import { ref, computed, watch, defineEmits, defineProps, onMounted, nextTick } from 'vue';
 import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeOrderDetail']);
@@ -112,11 +112,9 @@ const orderStatus = [
 ]
 
 const status = ref('Đang xử lý');
+let isNotChange = ref(false);
 
 const updateOrder = () => {
-    if (productOrder.value.Status == 2 || productOrder.value.Status == 3) {
-        return;
-    }
     store.dispatch('updateOrder', {
         ...productOrder.value,
         Status: productOrder.value.Status
@@ -134,6 +132,16 @@ const formatNumber = (number) => {
         maximumFractionDigits: 2, // Số chữ số thập phân tối đa
     }).format(number);
 };
+
+onMounted(() => {
+    nextTick(() => {
+        if (productOrder.value.Status == 2 || productOrder.value.Status ==  3) {
+            isNotChange.value = true;
+        } else {
+            isNotChange.value = false;
+        }
+    })
+})
 
 </script>
 

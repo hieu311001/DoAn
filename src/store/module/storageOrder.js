@@ -1,3 +1,4 @@
+import { handleShowToast } from "@/common/commonFn";
 import {
     constants
 } from "@/config";
@@ -13,6 +14,10 @@ const mutations = {
         state.dataStorageOrders = payload;
     },
 
+    getAllStorageOrderByStorage(state, payload) {
+        state.dataStorageOrders = payload;
+    },
+
     getStorageOrderDetail(state, payload) {
         state.dataStorageOrderDetail = payload;
     }
@@ -20,15 +25,14 @@ const mutations = {
 
 const actions = {
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * 
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async createStoreOrder(context, param) {
         try {
             const res = await axios.post(`${constants.API_URL}/api/StorageOrder/store-order`, param)
             if (res.data) {
-                alert("Thêm yêu cầu thành công");
+                handleShowToast(context, "Thêm yêu cầu thành công", 1);
             }
         } catch (error) {
             console.log(error);
@@ -36,9 +40,23 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * 
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
+     */
+    async createStoreOrderByStorage(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/StorageOrder/store-order-storage`, param)
+            if (res.data) {
+                handleShowToast(context, "Thêm yêu cầu thành công", 1);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * 
+     * @param {*} context 
      */
     async getAllStorageOrder(context, param) {
         try {
@@ -52,9 +70,23 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * 
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
+     */
+    async getAllStorageOrderByStorage(context, param) {
+        try {
+            const res = await axios.get(`${constants.API_URL}/api/StorageOrder/${param}`)
+            if (res.data) {
+                context.commit("getAllStorageOrderByStorage", res.data)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     *
+     * @param {*} context 
      */
     async getStorageOrderDetail(context, param) {
         try {
@@ -68,15 +100,14 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     *
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async updateStorageOrder(context, param) {
         try {
             const res = await axios.put(`${constants.API_URL}/api/StorageOrder`, param)
             if (res.data) {
-                alert("Cập nhật yêu cầu thành công")
+                handleShowToast(context, "Cập nhật yêu cầu thành công", 1);
             }
         } catch (error) {
             console.log(error);
@@ -84,15 +115,14 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * 
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async acceptStorageOrder(context, param) {
         try {
             const res = await axios.put(`${constants.API_URL}/api/StorageOrder/accept`, param)
             if (res.data) {
-                alert("Cập nhật yêu cầu thành công")
+                handleShowToast(context, "Cập nhật yêu cầu thành công", 1);
             }
         } catch (error) {
             console.log(error);

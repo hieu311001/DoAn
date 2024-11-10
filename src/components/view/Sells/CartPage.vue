@@ -43,30 +43,35 @@
                 </div>
                 <div class="mt-3 info-pay">
                     <div class="pay-info">
+                        <div class="flex gap-8 mt-3" v-if="userInfo.Role == 3">
+                            <p><strong>Cửa hàng:</strong></p>
+                            <BaseCombobox cbbClass="cb-store" id="category" propValue="StoreID" propText="StoreText" :data=storeInfo
+                                 @getValueCombobox="getDataCombobox" v-model="customer.Store"/>
+                        </div>
                         <div class="flex gap-8">
-                            <div class="label-item">
+                            <div class="label-item flex gap-8 mt-3">
                                 <div class="label">
                                     Họ và tên:
                                 </div>
-                                <div class="input">
+                                <div class="input flex-1">
                                     <input v-model="customer.Name" type="text" class="m-input input-product" />
                                 </div>
                             </div>
-                            <div class="label-item">
+                            <div class="label-item flex gap-8 mt-3">
                                 <div class="label">
                                     SĐT:
                                 </div>
-                                <div class="input">
-                                    <input  v-model="customer.Phone" type="text" class="m-input input-product" />
+                                <div class="input flex-1">
+                                    <input v-model="customer.Phone" type="text" class="m-input input-product" />
                                 </div>
                             </div>
                         </div>
                         <div class="flex gap-8 mt-3">
-                            <div class="label-item">
+                            <div class="label-item flex gap-8 mt-3">
                                 <div class="label">
                                     Địa chỉ:
                                 </div>
-                                <div class="input">
+                                <div class="input flex-1">
                                     <input v-model="customer.Address" type="text" class="m-input input-product" />
                                 </div>
                             </div>
@@ -106,7 +111,7 @@
 
 <script setup>
 import { useStore } from 'vuex';
-import { generateGUID } from '@/common/commonFn';
+import { generateGUID, showToastWarning } from '@/common/commonFn';
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeCart']);
@@ -118,10 +123,21 @@ const promoCode = ref('');
 const customer = ref({
     Name: '',
     Phone: '',
-    Address: ''
+    Address: '',
+    Store: null
 });
 
 const store = useStore();
+
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
+const storeInfo = computed(() => store.state.stores.storeInfo);
 
 const paymentMethod = ref(0);
 
@@ -147,21 +163,21 @@ const removeFromCart = (productId) => {
 };
 
 const createOrder = () => {
-    if (localCart.value.length <= 0) {
-        alert('Không có sản phẩm nào');
+    if (localCart.value.length <= 0 && userInfo.value.Role != 3) {
+        showToastWarning(store, "Không có sản phẩm nào");
         return;
     }
 
     let productOrderID = generateGUID();
     let paramMaster = {
         ProductOrderID: productOrderID,
-        UserID: generateGUID(),
+        UserID: userInfo.value.UserID,
         FullName: customer.value.Name,
         PhoneNumber: customer.value.Phone,
         Address: customer.value.Address,
         TotalPrice: total.value,
         PaymentMethod: paymentMethod.value,
-        StoreID: '8101bb84-99e2-11ef-a88b-02508d4f66ec',
+        StoreID: userInfo.value.Role == 3 ? customer.value.Store : userInfo.value.StoreID,
         OrderDate: new Date(),
         Status: 0
     }
@@ -182,15 +198,36 @@ const createOrder = () => {
         productOrder: paramMaster,
         productOrderDetails: paramDetail,
     });
-    
+
     closeCart(true);
 };
 
 const closeCart = (resetCart) => {
     emit('closeCart', resetCart);
 }
+
+onMounted(() => {
+    if (userInfo.value.Role == 3) {
+        customer.value.Name = userInfo.value.FullName;
+        customer.value.Phone = userInfo.value.PhoneNumber;
+        customer.value.Address = userInfo.value.Address;
+    }
+})
 </script>
 
+<style lang="scss">
+.cb-store {
+    flex: 1;
+
+    .combobox__input {
+        min-height: 32px !important;
+    }
+
+    .combobox-icon {
+        top: 5px !important; 
+    }
+}
+</style>
 
 <style lang="scss" scoped>
 .cart-container {
@@ -205,7 +242,7 @@ const closeCart = (resetCart) => {
     .filter-bot {
         justify-content: flex-end;
         padding-top: 12px;
-    } 
+    }
 
     .product-image {
         width: 50px;
@@ -223,7 +260,7 @@ const closeCart = (resetCart) => {
 
     .label-item {
         flex: 1;
-        
+
         .label {
             font-size: 16px;
             font-weight: 600;
@@ -272,7 +309,8 @@ td {
 
 .radio-group {
     display: flex;
-    gap: 20px; /* Khoảng cách giữa các nút radio */
+    gap: 20px;
+    /* Khoảng cách giữa các nút radio */
 }
 
 .radio-container {
@@ -284,12 +322,14 @@ td {
 }
 
 .radio-container input[type="radio"] {
-    display: none; /* Ẩn radio gốc */
+    display: none;
+    /* Ẩn radio gốc */
 }
 
 .radio-label {
     position: relative;
-    padding-left: 24px; /* Khoảng cách cho nút radio tùy chỉnh */
+    padding-left: 24px;
+    /* Khoảng cách cho nút radio tùy chỉnh */
     cursor: pointer;
 }
 
@@ -301,25 +341,29 @@ td {
     transform: translateY(-50%);
     width: 16px;
     height: 16px;
-    border: 2px solid #007bff; /* Màu viền của radio */
+    border: 2px solid #007bff;
+    /* Màu viền của radio */
     border-radius: 50%;
-    background-color: #fff; /* Màu nền */
+    background-color: #fff;
+    /* Màu nền */
     transition: background-color 0.3s, border-color 0.3s;
 }
 
-.radio-container input[type="radio"]:checked + .radio-label::before {
-    border-color: #007bff; /* Màu viền khi được chọn */
+.radio-container input[type="radio"]:checked+.radio-label::before {
+    border-color: #007bff;
+    /* Màu viền khi được chọn */
 }
 
-.radio-container input[type="radio"]:checked + .radio-label::after {
+.radio-container input[type="radio"]:checked+.radio-label::after {
     content: "";
     position: absolute;
-    left: 4px; /* Căn giữa vòng tròn nhỏ bên trong */
+    left: 4px;
+    /* Căn giữa vòng tròn nhỏ bên trong */
     top: calc(50% - 4px);
     width: 8px;
     height: 8px;
-    background-color: #007bff; /* Màu vòng tròn nhỏ bên trong */
+    background-color: #007bff;
+    /* Màu vòng tròn nhỏ bên trong */
     border-radius: 50%;
 }
-
 </style>

@@ -40,4 +40,11 @@ export const StorageOrderStatus = {
     Cancel: 2
 }
 
+export const ToastStatus = {
+    Success: 1,     // Thao tác thành công
+    Fail: 2, // Thao tác thất bại,
+    Warning: 3 // Cảnh báo
+}
+
+
 export default Enumeration;

@@ -1,3 +1,4 @@
+import { handleShowToast } from "@/common/commonFn";
 import { constants } from "@/config";
 import axios from "axios";
 
@@ -20,7 +21,6 @@ const actions = {
     /**
      * Lấy tất cả bản ghi danh hiệu thi đua
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async getAllProduct(context, param) {
         try {
@@ -36,13 +36,59 @@ const actions = {
     /**
      * Lấy tất cả bản ghi danh hiệu thi đua
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async getProductByID(context, param) {
         try {
             const res = await axios.get(`${constants.API_URL}/api/Product/id?id=${param}`)
             if (res.data) {
                 context.commit("getProductByID", res.data)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     */
+    async deleteProductByID(context, param) {
+        try {
+            const res = await axios.delete(`${constants.API_URL}/api/Product`, {
+                data: [param]
+            })
+            if (res.data) {
+                handleShowToast(context, "Xóa sản phẩm thành công", 1);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     */
+    async updateProduct(context, param) {
+        try {
+            const res = await axios.put(`${constants.API_URL}/api/Product`, param)
+            if (res.data) {
+                handleShowToast(context, "Cập nhật thông tin sản phẩm thành công", 1);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     */
+    async addProduct(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/Product`, param)
+            if (res.data) {
+                handleShowToast(context, "Thêm sản phẩm thành công", 1);
             }
         } catch (error) {
             console.log(error);

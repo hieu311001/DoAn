@@ -29,10 +29,10 @@ export const ProductOrderStatus = {
 }
 
 export const Role = {
-    Admin: 0,
-    Staff: 1,
-    StorageStaff: 2,
-    Customer: 3,
+    Admin: "Quản lý",
+    Staff: "Nhân viên",
+    StorageStaff: "Nhân viên kho",
+    Customer: "Khách hàng",
 }
 
 export const StorageOrderStatus = {

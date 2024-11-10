@@ -92,6 +92,10 @@ strong{
     color: #e54848;
 }
 
+.flex-1 {
+    flex: 1;
+}
+
 button:disabled {
     opacity: 0.6;
 }

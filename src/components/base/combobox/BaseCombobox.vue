@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div class="combobox" :autoFocus="autoFocus" :class="cbbClass" v-clickOutside="hideListData" ref="combobox">
+    <div :class="cbbClass">
+        <div class="combobox" :autoFocus="autoFocus"  v-clickOutside="hideListData" ref="combobox">
             <input :id="id" :disabled="disabled" :class="disabled ? 'disabled' : ''" type="text" class="input combobox__input" ref="input" v-model="textInput"
                 @input="inputOnChange" @keydown="selecItemUpDown" @mouseover="handleMouse" @click="btnSelectDataOnClick"
                 :tabindex="tabindex" :placeholder="placeholder" :resetValue="resetValue" autocomplete="off" />
@@ -459,6 +459,10 @@ select {
     outline: 1px solid #1a73e8;
 }
 
+.combobox__input::placeholder {
+    opacity: 0.5;
+}
+
 .combobox__error>input {
     outline: 1px solid #ef5350;
     border: none;
@@ -466,6 +470,10 @@ select {
 
 .combobox__error>input:focus {
     outline: 1px solid #ef5350;
+}
+
+.flex-1{
+    flex: 1;
 }
 
 .cbb-error:focus {

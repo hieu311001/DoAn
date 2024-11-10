@@ -3,7 +3,8 @@
         <div class="product-detail-container">
             <div class="product-title flex space-between">
                 <div class="title-left">
-                    <h2>Thông tin sản phẩm</h2>
+                    <h2 v-if="isAdd && !isUpdate">Thêm sản phẩm</h2>
+                    <h2 v-else>Thông tin sản phẩm</h2>
                 </div>
                 <div class="title-right">
                     <div class="icon-close" @click="closeProduct">
@@ -13,49 +14,61 @@
             </div>
             <div class="product-detail">
                 <div class="product-image" @click="selectImage">
-                    <img :src="product.Image" alt="Product Image" class="image-preview" />
-                    <input type="file" ref="refFile" @change="onImageChange" style="display: none;" disabled>
+                    <div :class="['image-preview-box', product.Image ? 'no-border' : '']">
+                        <img v-if="product.Image" :src="product.Image" alt="Product Image" class="image-preview" />
+                        <div v-else class="image-placeholder">Chọn ảnh</div>
+                    </div>
+                    <input type="file" ref="refFile" @change="onImageChange" style="display: none;" :disabled="!isAdd">
                 </div>
                 <div class="product-info">
                     <div class="item">
                         <h3>Tên sản phẩm:</h3>
-                        <input v-model="product.ProductName" type="text" class="m-input input-product" disabled>
+                        <input v-model="product.ProductName" type="text" class="m-input input-product"
+                            :disabled="!isAdd">
                     </div>
                     <div class="item">
                         <h3>Giá:</h3>
-                        <input v-model.number="product.Price" type="number" class="m-input input-product" disabled />
+                        <input v-model.number="product.Price" type="number" class="m-input input-product"
+                            :disabled="!isAdd" />
                     </div>
                     <div class="item">
                         <h3>Khuyến mãi (%):</h3>
-                        <input v-model.number="product.Sale" type="number" class="m-input input-product" disabled />
+                        <input v-model.number="product.Sale" type="number" class="m-input input-product"
+                            :disabled="!isAdd" />
                     </div>
-                    <div class="item">
+                    <div class="item" v-if="!isAdd">
                         <h3>Số lượng tồn kho:</h3>
                         <input v-model.number="product.TotalAmount" type="number" class="m-input input-product"
-                            disabled />
+                            :disabled="!isAdd" />
                     </div>
                 </div>
             </div>
             <div class="product-description">
                 <h3>Diễn giải:</h3>
-                <div v-html="product.Description" contenteditable="false" class="description-preview"></div>
+                <div v-html="product.Description" ref="refDes" :contenteditable="isAdd == 1 ? true : false"
+                    class="description-preview"></div>
             </div>
             <div class="product-bottom">
-
+                <button v-if="isAdd && !isUpdate" @click="addProduct" class="btn-add">Thêm sản phẩm</button>
+                <button v-if="isAdd && isUpdate" @click="updateProduct" class="btn-update">Cập nhật</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
+import { generateGUID } from '@/common/commonFn';
 import BaseCounter from '@/components/base/BaseCounter.vue';
-import { ref, computed, watch, defineEmits, defineProps } from 'vue';
+import { ref, computed, watch, defineEmits, defineProps, onMounted, nextTick, reactive } from 'vue';
 import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'closeProduct', 'addToCart']);
 const props = defineProps({
-    product: null, // Data mà component cha gửi xuống
-    isImport: {
+    isAdd: {
+        default: false,
+        type: Boolean,
+    },
+    isUpdate: {
         default: false,
         type: Boolean,
     },
@@ -63,7 +76,16 @@ const props = defineProps({
 
 const store = useStore();
 
-const product = computed(() => store.state.product.dataProductDetail);
+const refDes = ref(null);
+
+const product = ref({
+    Image: null,
+    ProductName: null,
+    Price: 0,
+    Sale: 0,
+    TotalAmount: 0,
+    Description: null
+})
 
 const quantity = ref(1);
 const refFile = ref(null);
@@ -94,6 +116,23 @@ const onImageChange = (event) => {
     }
 };
 
+const addProduct = async () => {
+    delete product.value.TotalAmount;
+    await store.dispatch('addProduct', {
+        ...product.value,
+        ProductID: generateGUID(),
+        Description: refDes.value.innerHTML,
+        ProductCategory: 0,
+        Brand: null
+    });
+    closeProduct();
+};
+
+const updateProduct = async () => {
+    await store.dispatch('updateProduct', product.value);
+    closeProduct();
+};
+
 const closeProduct = () => {
     emit('closeProduct');
 }
@@ -105,6 +144,11 @@ const addToCart = () => {
     emit('addToCart', { quantity: quantity.value, product: props.product });
 }
 
+onMounted(() => {
+    if (props.isAdd && props.isUpdate) {
+        product.value = store.state.product.dataProductDetail;
+    }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -150,13 +194,36 @@ const addToCart = () => {
         width: 300px;
         flex: 1;
         cursor: pointer;
-    }
+        position: relative;
 
-    .image-preview {
-        width: 100%;
-        height: auto;
-        border-radius: 5px;
-        border: 1px solid #ccc;
+        .image-preview-box {
+            height: 100%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+
+            &.no-border {
+                border: none;
+                /* Loại bỏ viền khi có ảnh */
+            }
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .image-placeholder {
+            color: #aaa;
+            font-size: 16px;
+            text-align: center;
+        }
     }
 
     .product-info {
@@ -261,5 +328,40 @@ button {
 .btn-back {
     background-color: #757575;
     color: white;
+}
+
+.product-bottom {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-add,
+.btn-update {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-add {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-add:hover {
+    background-color: #0056b3;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-update:hover {
+    background-color: #0056b3;
 }
 </style>

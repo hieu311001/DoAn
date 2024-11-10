@@ -61,9 +61,12 @@
                     </div>
                 </div>
                 <div class="filter-right">
-                    <div class="cart-button" @click="openCart">
+                    <div class="cart-button" @click="openCart" v-if="userInfo.Role != 0">
                         Nhập sản phẩm
                         <span v-if="cart.length > 0" class="badge">{{ cart.length }}</span>
+                    </div>
+                    <div class="cart-button" @click="addProduct" v-if="userInfo.Role == 0">
+                        Thêm sản phẩm
                     </div>
                 </div>
             </div>
@@ -75,8 +78,8 @@
                                 <th>Hình ảnh</th>
                                 <th>Tên sản phẩm</th>
                                 <th>Giá</th>
-                                <th>Tồn kho</th>
-                                <th>Trạng thái</th>
+                                <th v-if="userInfo.Role != 0">Tồn kho</th>
+                                <th v-if="userInfo.Role != 0">Trạng thái</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
@@ -90,8 +93,8 @@
                                 </td>
                                 <td>{{ product.ProductName }}</td>
                                 <td>{{ formatNumber(product.Price) }}</td>
-                                <td>{{ product.TotalAmount }}</td>
-                                <td :class="getStatusClass(product.TotalAmount)">
+                                <td v-if="userInfo.Role != 0">{{ product.TotalAmount }}</td>
+                                <td v-if="userInfo.Role != 0" :class="getStatusClass(product.TotalAmount)">
                                     <div class="center">
                                         <span v-if="product.TotalAmount <= 15" class="warning-icon">
                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -106,7 +109,11 @@
 
                                 </td>
                                 <td>
-                                    <BaseButton class="m-button btn-white no-wrap" text="Nhập hàng" @click="addToCart(product)">
+                                    <BaseButton class="m-button btn-white no-wrap" v-if="userInfo.Role != 0"
+                                        text="Nhập hàng" @click="addToCart(product)">
+                                    </BaseButton>
+                                    <BaseButton class="m-button btn-white no-wrap" v-if="userInfo.Role == 0" text="Xóa"
+                                        @click="deleteProduct(product)">
                                     </BaseButton>
                                 </td>
                             </tr>
@@ -116,8 +123,25 @@
             </div>
         </div>
         <ProductStorage :cart="cart" v-if="showCart" @updateCart="updateCart" @closeCart="closeCart"></ProductStorage>
-        <ProductStorageDetail :product="productDetail" :isImport="true" v-if="showDetail" @closeProduct="closeProduct">
+        <ProductStorageDetail :product="productDetail" :isAdd="userInfo.Role == 0" :isUpdate="isUpdate"
+            v-if="showDetail" @closeProduct="closeProduct">
         </ProductStorageDetail>
+
+        <!-- Modal xác nhận xóa -->
+        <div v-if="showDeleteModal" class="delete-modal-overlay">
+            <div class="delete-modal">
+                <div class="modal-title">
+                    Xác nhận xóa
+                </div>
+                <div class="modal-content">
+                    Bạn có chắc chắn muốn xóa sản phẩm này không?
+                </div>
+                <div class="modal-actions">
+                    <BaseButton class="m-button btn-white" text="Hủy" @click="closeDeleteModal" />
+                    <BaseButton class="m-button btn-red" text="Đồng ý" @click="confirmDeleteProduct" />
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -191,7 +215,18 @@ const dataPrice = [
 
 const store = useStore();
 
+const isUpdate = ref(false);
+
 const products = computed(() => store.state.product.dataProducts);
+
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
@@ -207,8 +242,14 @@ const openCart = () => {
     showCart.value = true;
 }
 
-const viewProductDetail = (product) => {
-    store.dispatch('getProductByID', product.ProductID);
+const addProduct = () => {
+    showDetail.value = true;
+}
+
+const viewProductDetail = async (product) => {
+    productDetail.value = product;
+    isUpdate.value = true;
+    await store.dispatch('getProductByID', product.ProductID);
     showDetail.value = true;
 };
 
@@ -221,10 +262,14 @@ const closeCart = (resetCart) => {
     if (resetCart) {
         cart.value = [];
     }
+
+    loadProduct();
 }
 
 const closeProduct = () => {
+    isUpdate.value = false;
     showDetail.value = false;
+    loadProduct();
 }
 
 const getStatus = (stock) => (stock === 0 ? 'Hết hàng' : stock <= 15 ? 'Sắp hết' : 'Còn hàng');
@@ -259,8 +304,40 @@ const formatNumber = (number) => {
     }).format(number);
 };
 
+const showDeleteModal = ref(false);
+const productToDelete = ref(null);
+
+const deleteProduct = (product) => {
+    showDeleteModal.value = true;
+    productToDelete.value = product;
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    productToDelete.value = null;
+
+};
+
+const confirmDeleteProduct = async () => {
+    if (productToDelete.value) {
+        // Gọi hàm xóa sản phẩm trong store hoặc thực hiện hành động xóa
+        await store.dispatch('deleteProductByID', productToDelete.value.ProductID);
+        loadProduct();
+    }
+
+    closeDeleteModal();
+};
+
+const loadProduct = () => {
+    let storeID = '00000000-0000-0000-0000-000000000000';
+    if (userInfo.value.Role == 1) {
+        storeID = userInfo.value.StoreID;
+    }
+    store.dispatch('getAllProduct', storeID);
+}
+
 onMounted(() => {
-    store.dispatch('getAllProduct', '8101bb84-99e2-11ef-a88b-02508d4f66ec');
+    loadProduct();
 })
 
 </script>
@@ -484,14 +561,48 @@ onMounted(() => {
         height: 24px;
         fill: currentColor;
     }
-}
 
-@media (max-width: 768px) {
+    .delete-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
 
-    /* Khi chiều rộng màn hình nhỏ hơn 768px */
-    .product-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        /* Chuyển thành 2 sản phẩm mỗi hàng */
+    .delete-modal {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        width: 400px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 16px;
+    }
+
+    .modal-content {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-red {
+        background-color: red;
+        color: white;
     }
 }
 </style>

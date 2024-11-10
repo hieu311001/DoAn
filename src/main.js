@@ -5,6 +5,7 @@ import App from './App.vue'
 import clickOutside from './common/directive/clickOutside';
 import tooltip from '@/common/directive/tooltip';
 import '@fortawesome/fontawesome-free/css/all.css'; // Import CSS của Font Awesome
+import { getCookie } from './common/commonFn';
 
 /* import the fontawesome core */
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -44,6 +45,9 @@ const vuetify = createVuetify({
 
 
 const app = createApp(App);
+
+// Gắn hàm dùng chung vào `globalProperties`
+app.config.globalProperties.getCookie = getCookie;
 
 app.component("CartPage", CartPage);
 app.component("BaseInput", BaseInput);

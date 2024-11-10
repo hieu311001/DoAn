@@ -63,7 +63,7 @@
 
 <script setup>
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
-import { generateGUID } from '@/common/commonFn';
+import { generateGUID, showToastWarning } from '@/common/commonFn';
 import { useStore } from 'vuex';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeCart']);
@@ -74,6 +74,15 @@ const props = defineProps({
 const store = useStore();
 
 const note = ref();
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 // Tạo một biến local để lưu trữ cart
 const localCart = ref([...props.cart]);
@@ -88,16 +97,16 @@ const removeFromCart = (productId) => {
 
 const createStoreOrder = () => {
     if (localCart.value.length <= 0) {
-        alert('Không có sản phẩm nào');
+        showToastWarning(store, "Không có sản phẩm nào");
         return;
     }
 
     let storageOrderID = generateGUID();
     let paramMaster = {
         StorageOrderID: storageOrderID,
-        StoreID: '8101bb84-99e2-11ef-a88b-02508d4f66ec',
+        StoreID: userInfo.value.StoreID,
         CreateDate: new Date(),
-        Status: 0,
+        Status: userInfo.value.Role == 2 ? 1 : 0,
         Note: note.value
     }
 
@@ -112,10 +121,17 @@ const createStoreOrder = () => {
         })
     })
 
-    store.dispatch('createStoreOrder', {
-        storeOrder: paramMaster,
-        storeOrderDetails: paramDetail,
-    });
+    if (userInfo.value.Role == 2) {
+        store.dispatch('createStoreOrderByStorage', {
+            storeOrder: paramMaster,
+            storeOrderDetails: paramDetail,
+        });
+    } else {
+        store.dispatch('createStoreOrder', {
+            storeOrder: paramMaster,
+            storeOrderDetails: paramDetail,
+        });
+    }
 
     closeCart(true);
 };

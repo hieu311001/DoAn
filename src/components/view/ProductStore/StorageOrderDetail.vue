@@ -65,7 +65,7 @@
 <script setup>
 import { ref, computed, watch, defineEmits, defineProps, onMounted } from 'vue';
 import { useStore } from 'vuex';
-import { formatDate } from '@/common/commonFn';
+import { formatDate, showToastWarning } from '@/common/commonFn';
 
 const emit = defineEmits(['update:modelValue', 'saveForm', 'updateCart', 'closeOrderDetail']);
 const props = defineProps({
@@ -107,7 +107,7 @@ const acceptRequest = async () => {
     let flag = true;
     productStoreDetail.value.forEach(item => {
         if (item.Amount > item.TotalAmount) {
-            alert("Số lượng sản phẩm trong kho không đủ");
+            showToastWarning(store, "Số lượng sản phẩm trong kho không đủ");
             flag = false;
             return;
         }

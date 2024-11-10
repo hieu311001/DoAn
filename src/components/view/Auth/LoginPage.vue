@@ -6,8 +6,9 @@
             <div class="form-label form-username">
                 <label class="m-label f-16" for="">Tên đăng nhập</label>
                 <BaseInput 
+                    v-model="user.UserName"
                     :tabindex="1" 
-                    placeholder="Nhập tên tài khoản"
+                    placeholder="Nhập tên tài khoản/email"
                     inputClass="m-input no-icon">
                 </BaseInput>
             </div>
@@ -15,6 +16,7 @@
                 <label class="m-label f-16" for="">Mật khẩu</label>
                 <BaseInput 
                     :tabindex="2" 
+                    v-model="user.Password"
                     type="password"
                     placeholder="Nhập mật khẩu"
                     inputClass="m-input no-icon">
@@ -38,6 +40,36 @@
 <script setup>
 import BaseInput from '../../base/input/BaseInput.vue'
 import BaseButton from '../../base/button/BaseButton.vue'
+import { useStore } from 'vuex';
+import { reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const store = useStore();
+
+const userInfo = computed(() => store.state.user.userInfo);
+
+const user = reactive({
+    UserName: null,
+    Password: null
+})
+
+const login = async () => {
+   var loginSuccess = await store.dispatch('login', user);
+   if (loginSuccess) {
+        router.push({ name: 'sell' });
+        setCookie('token', userInfo.value.AccessToken, 1);
+        setCookie('userInfo', JSON.stringify(userInfo.value), 1);
+   }
+}
+
+const setCookie = (name, value, days) => {
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = "expires=" + date.toUTCString();
+  document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
 </script>
 
 <style scoped>

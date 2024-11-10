@@ -76,7 +76,7 @@
                             <div v-if="product.Sale > 0" class="Sale-badge">
                                 -{{ product.Sale }}%
                             </div>
-                            <div v-if="product.TotalAmount === 0" class="out-of-stock">Hết hàng</div>
+                            <div v-if="product.TotalAmount === 0 && userInfo.Role != 3" class="out-of-stock">Hết hàng</div>
                         </div>
                         <h3 class="product-name">{{ product.ProductName }}</h3>
                         <div class="product-price">
@@ -171,7 +171,15 @@ const dataPrice = [
 
 const store = useStore();
 
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null; // Trả về null nếu không tìm thấy cookie
+}
+
 const dataCells = computed(() => store.state.sell.dataSell);
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
@@ -180,7 +188,9 @@ const showCart = ref(false);
 const showDetail = ref(false);
 const productDetail = ref(null);
 
-const openCart = () => {
+
+const openCart = async () => {
+    await store.dispatch('getStore');
     showCart.value = true;
 }
 
@@ -193,7 +203,10 @@ const updateCart = (cartData) => {
     cart.value = cartData;
 }
 
-const closeCart = (cart) => {
+const closeCart = (resetCart) => {
+    if (resetCart) {
+        cart.value = [];
+    }
     showCart.value = false;
 }
 
@@ -246,7 +259,11 @@ const formatNumber = (number) => {
 };
 
 onMounted(() => {
-    store.dispatch('getAllProductSell', '80ff566d-99e2-11ef-a88b-02508d4f66ec');
+    let storeID = '00000000-0000-0000-0000-000000000000';
+    if (userInfo.value.Role == 1) {
+        storeID = userInfo.value.StoreID;
+    }
+    store.dispatch('getAllProductSell', storeID);
 })
 
 </script>

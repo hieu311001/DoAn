@@ -5,9 +5,9 @@
         </div>
         <div class="content">
             <div class="tabs flex gap-8">
-                <BaseButton @click="showContent('orders')" class="m-button btn-white"
+                <BaseButton @click="showContent('orders')" class="m-button btn-white" v-if="userInfo?.Role != 2"
                     :class="{ active: activeTab === 'orders' }" text="Đơn hàng đã tạo"></BaseButton>
-                <BaseButton @click="showContent('requests')" class="m-button btn-white"
+                <BaseButton @click="showContent('requests')" class="m-button btn-white" v-if="userInfo?.Role != 3"
                     :class="{ active: activeTab === 'requests' }" text="Yêu Cầu Nhập Hàng
                     Đã Tạo"></BaseButton>
             </div>
@@ -32,7 +32,7 @@
                                     :class="{ 'row-hover': hoveredProductId === product.ProductOrderID }">
                                     <td>{{ product.FullName }}</td>
                                     <td>{{ formatDate(product.OrderDate) }}</td>
-                                    <td>{{ formatNumber(product.TotalAmount) }} đ</td>
+                                    <td>{{ formatNumber(product.TotalPrice) }} đ</td>
                                     <td>{{ getValueEnum(product.PaymentMethod, "PaymentMethod") }}</td>
                                     <td>{{ getValueEnum(product.Status, "ProductOrderStatus") }}</td>
                                 </tr>
@@ -47,17 +47,19 @@
                                 <tr class="fix-row">
                                     <th>Tên cửa hàng</th>
                                     <th>Ngày tạo</th>
+                                    <th>Ghi chú</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="product in productStorages" :key="product.ProductID"
+                                <tr v-for="product in productStorages" :key="product.ProdStorageOrderIDuctID"
                                     @dblclick="viewProductStorageDetail(product)"
-                                    @mouseenter="hoveredProductId = product.ProductID"
+                                    @mouseenter="hoveredProductId = product.StorageOrderID"
                                     @mouseleave="hoveredProductId = null"
-                                    :class="{ 'row-hover': hoveredProductId === product.ProductID }">
+                                    :class="{ 'row-hover': hoveredProductId === product.StorageOrderID }">
                                     <td>{{ product.StoreName }}</td>
                                     <td>{{ formatDate(product.CreateDate) }}</td>
+                                    <td>{{ product.Note }}</td>
                                     <td>{{ getValueEnum(product.Status, "StorageOrderStatus") }}</td>
                                 </tr>
                             </tbody>
@@ -66,19 +68,19 @@
                 </div>
             </div>
         </div>
-        <ProductStorageDetail :product="productDetail" :isEdit="false" v-if="showStorageDetail" @closeProductStorageDetail="closeProductStorageDetail">
-        </ProductStorageDetail>
-        <ProductOrderDetail v-if="showOrder" :isEdit="false" @closeOrderDetail="closeOrderDetail">
+        <StorageOrderDetail :productStorageOrder="storageOrder" :isEdit="false" v-if="showStorageDetail" @closeOrderDetail="closeProductStorageDetail">
+        </StorageOrderDetail>
+        <ProductOrderDetail v-if="showOrder" :isEdit="false" :productOrder="productOrder" @closeOrderDetail="closeOrderDetail">
         </ProductOrderDetail>
     </div>
 </template>
 
 <script setup>
 import BaseButton from '@/components/base/button/BaseButton.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { formatDate, getValueEnum } from '@/common/commonFn';
-import ProductStorageDetail from '../ProductStore/StorageOrderDetail.vue';
+import StorageOrderDetail from '../ProductStore/StorageOrderDetail.vue';
 import ProductOrderDetail from '../ProductOrder/ProductOrderDetail.vue';
 
 const activeTab = ref('orders');
@@ -89,8 +91,21 @@ const showOrder = ref(false);
 const hoveredProductId = ref(null);
 
 const store = useStore();
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
+
 const productOrders = computed(() => store.state.productOrder.dataProductOrders);
 const productStorages = computed(() => store.state.storageOrder.dataStorageOrders);
+
+const productOrder = ref(null);
+const storageOrder = ref(null);
 
 const showContent = (tab) => {
     activeTab.value = tab;
@@ -100,7 +115,9 @@ const closeProductStorageDetail = () => {
     showStorageDetail.value = false;
 }
 
-const viewProductStorageDetail = (tab) => {
+const viewProductStorageDetail = async (product) => {
+    storageOrder.value = product;
+    await store.dispatch('getStorageOrderDetail', product.StorageOrderID);
     showStorageDetail.value = true;
 }
 
@@ -108,7 +125,9 @@ const closeOrderDetail = () => {
     showOrder.value = false;
 }
 
-const viewOrderDetail = (tab) => {
+const viewOrderDetail = async (product) => {
+    productOrder.value = product;
+    await store.dispatch('getOrderDetail', product.ProductOrderID);
     showOrder.value = true;
 }
 
@@ -118,6 +137,23 @@ const formatNumber = (number) => {
         maximumFractionDigits: 2, // Số chữ số thập phân tối đa
     }).format(number);
 };
+
+onMounted(() => {
+    let storeID = '00000000-0000-0000-0000-000000000000';
+    if (userInfo.value.Role == 1) {
+        storeID = userInfo.value.StoreID;
+    }
+
+    if (userInfo.value.Role == 3) {
+        store.dispatch('getOrderUser', userInfo.value.UserID);
+    } else if (userInfo.value.Role == 2) {
+        activeTab.value = 'requests'
+        store.dispatch('getAllStorageOrderByStorage', storeID);
+    } else {
+        store.dispatch('getOrder', storeID);
+        store.dispatch('getAllStorageOrderByStorage', storeID);
+    }
+})
 </script>
 
 <style lang="scss" scoped>

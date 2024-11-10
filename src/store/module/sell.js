@@ -15,7 +15,6 @@ const actions = {
     /**
      * Lấy tất cả bản ghi danh hiệu thi đua
      * @param {*} context 
-     * CreatedBy VMHieu 28/03/2023
      */
     async getAllProductSell(context, param) {
         try {

@@ -49,7 +49,7 @@ export function formatDate(date) {
 
     if (!(date instanceof Date)) {
         let dateClone = new Date(date);
-    
+
         if (!isNaN(dateClone.getTime())) {
             date = dateClone;
         }
@@ -72,4 +72,27 @@ export function generateGUID() {
         const value = char === 'x' ? random : (random & 0x3 | 0x8);
         return value.toString(16);
     });
+}
+
+export function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Trả về null nếu không tìm thấy cookie
+}
+
+export function handleShowToast(context, msg, status) {
+    context.commit('updateToastStatus', status);
+    context.commit('updateToastMsg', msg);
+    context.commit('showToast', true);
+    setTimeout(() => {
+        context.commit('showToast', false);
+    }, 2000);
+    context.commit("showLoading", false);
+}
+
+export function showToastWarning(store, msg){
+    store.dispatch("showToast", true);
+    store.dispatch("updateToastStatus", Enumeration.ToastStatus.Warning);
+    store.dispatch("updateToastMsg", msg);
 }

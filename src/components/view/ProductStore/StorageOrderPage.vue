@@ -97,8 +97,8 @@
                 </div>
             </div>
         </div>
-        <ProductStorageDetail :productStorageOrder="storageOrder" :isImport="true" v-if="showDetail" @closeOrderDetail="closeProduct">
-        </ProductStorageDetail>
+        <StorageOrderDetail :productStorageOrder="storageOrder" :isImport="true" v-if="showDetail" @closeOrderDetail="closeProduct">
+        </StorageOrderDetail>
     </div>
 </template>
 
@@ -106,7 +106,7 @@
 import { openModal } from '@/utils/modalStore';
 import { ref, onMounted, onUpdated, computed, watch, reactive, onBeforeMount, watchEffect } from 'vue';
 import { useStore } from 'vuex';
-import ProductStorageDetail from './StorageOrderDetail.vue';
+import StorageOrderDetail from './StorageOrderDetail.vue';
 import { getValueEnum, formatDate } from '@/common/commonFn';
 
 const showFilter = ref(false);
