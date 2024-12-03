@@ -10,6 +10,8 @@ import StorageOrderPage from '@/components/view/ProductStore/StorageOrderPage.vu
 import HistoryPage from '@/components/view/History/HistoryPage.vue';
 import StorePage from '@/components/view/Store/StorePage.vue';
 import StaffPage from '@/components/view/Staff/StaffPage.vue';
+import IntroducePage from '@/components/view/Introduce/IntroducePage.vue';
+import ReportPage from '@/components/view/Report/ReportPage.vue';
 
 const routes = [
   {
@@ -33,6 +35,14 @@ const routes = [
     component: TheHome,
   },
   {
+    path: '/intro',
+    name: 'intro',
+    components: {
+      default: IntroducePage,
+      content: IntroducePage, 
+    },
+  },
+  {
     path: '/store',
     name: 'store',
     components: {
@@ -54,6 +64,14 @@ const routes = [
     components: {
       default: SellPage,
       content: SellPage, 
+    },
+  },
+  {
+    path: '/report',
+    name: 'report',
+    components: {
+      default: ReportPage,
+      content: ReportPage, 
     },
   },
   {

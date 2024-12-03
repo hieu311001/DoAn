@@ -2,7 +2,8 @@
     <div class="modal-container">
         <div class="popup-container">
             <div class="popup-header">
-                <h2>Thêm cửa hàng</h2>
+                <h2 v-if="modeAdd">Thêm cửa hàng</h2>
+                <h2 v-else>Thông tin cửa hàng</h2>
                 <div class="icon-close" @click="closePopup">
                     <icon class="icon icon-exit"></icon>
                 </div>

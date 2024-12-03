@@ -23,23 +23,29 @@
                 <div class="product-info">
                     <div class="item">
                         <h3>Tên sản phẩm:</h3>
-                        <input v-model="product.ProductName" type="text" class="m-input input-product"
-                            :disabled="!isAdd">
+                        <input v-model="product.ProductName" placeholder="Nhập tên sản phẩm" type="text"
+                            class="m-input input-product" :disabled="!isAdd">
                     </div>
                     <div class="item">
                         <h3>Giá:</h3>
-                        <input v-model.number="product.Price" type="number" class="m-input input-product"
-                            :disabled="!isAdd" />
+                        <input v-model.number="product.Price" placeholder="Nhập giá sản phẩm" type="number"
+                            class="m-input input-product" :disabled="!isAdd" />
                     </div>
                     <div class="item">
                         <h3>Khuyến mãi (%):</h3>
-                        <input v-model.number="product.Sale" type="number" class="m-input input-product"
-                            :disabled="!isAdd" />
+                        <input v-model.number="product.Sale" placeholder="Nhập giá khuyến mãi sản phẩm" type="number"
+                            class="m-input input-product" :disabled="!isAdd" />
                     </div>
                     <div class="item" v-if="!isAdd">
                         <h3>Số lượng tồn kho:</h3>
                         <input v-model.number="product.TotalAmount" type="number" class="m-input input-product"
                             :disabled="!isAdd" />
+                    </div>
+                    <div class="item" v-if="isAdd">
+                        <h3>Danh mục:</h3>
+                        <BaseCombobox id="category" cbbClass="mt-3" placeholder="Chọn danh mục sản phẩm"
+                            propValue="Value" propText="Text" :data=dataCategory v-model="product.ProductCategory"
+                            :valueCombobox="product.ProductCategory" />
                     </div>
                 </div>
             </div>
@@ -73,6 +79,33 @@ const props = defineProps({
         type: Boolean,
     },
 })
+
+const dataCategory = [
+    {
+        Text: "Tất cả",
+        Value: ""
+    },
+    {
+        Text: "Mũ",
+        Value: 1
+    },
+    {
+        Text: "Áo",
+        Value: 2
+    },
+    {
+        Text: "Quần",
+        Value: 3
+    },
+    {
+        Text: "Giày dép",
+        Value: 4
+    },
+    {
+        Text: "Phụ kiện",
+        Value: 5
+    },
+]
 
 const store = useStore();
 
@@ -122,7 +155,6 @@ const addProduct = async () => {
         ...product.value,
         ProductID: generateGUID(),
         Description: refDes.value.innerHTML,
-        ProductCategory: 0,
         Brand: null
     });
     closeProduct();
@@ -145,7 +177,16 @@ const addToCart = () => {
 }
 
 onMounted(() => {
-    if (props.isAdd && props.isUpdate) {
+    if (props.isAdd && !props.isUpdate) {
+        product.value = {
+            Image: null,
+            ProductName: null,
+            Price: 0,
+            Sale: 0,
+            TotalAmount: 0,
+            Description: null
+        };
+    } else {
         product.value = store.state.product.dataProductDetail;
     }
 })

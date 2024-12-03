@@ -6,6 +6,8 @@ import axios from "axios";
 
 const state = {
     storeInfo: null,
+    storeReportInfo: null,
+    storageReportInfo: null,
     storeDetail: null
 }
 
@@ -15,6 +17,20 @@ const mutations = {
             item.StoreText = item.StoreName + ' - ' + item.Address;
         })
         state.storeInfo = payload;
+    },
+
+    getStoreReport(state, payload) {
+        payload.forEach(item => {
+            item.StoreText = item.StoreName + ' - ' + item.Address;
+        })
+        state.storeReportInfo = payload;
+    },
+
+    getStorageReport(state, payload) {
+        payload.forEach(item => {
+            item.StoreText = item.StoreName + ' - ' + item.Address;
+        })
+        state.storageReportInfo = payload;
     },
 
     getStoreByID(state, payload) {
@@ -32,6 +48,38 @@ const actions = {
             const res = await axios.get(`${constants.API_URL}/api/store`)
             if (res.data) {
                 context.commit("getStore", res.data);
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Đăng nhập
+     * @param {*} context 
+     */
+    async getStoreReport(context, param) {
+        try {
+            const res = await axios.get(`${constants.API_URL}/api/store/get-report/${param}`)
+            if (res.data) {
+                context.commit("getStoreReport", res.data);
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Đăng nhập
+     * @param {*} context 
+     */
+    async getStorageReport(context, param) {
+        try {
+            const res = await axios.get(`${constants.API_URL}/api/store/get-report-storage/${param}`)
+            if (res.data) {
+                context.commit("getStorageReport", res.data);
                 return true;
             }
         } catch (error) {

@@ -36,9 +36,6 @@
                                 <td>{{ store.StoreName }}</td>
                                 <td>{{ store.Address }}</td>
                                 <td>
-                                    <BaseButton class="m-button btn-white no-wrap" style="margin-right: 8px"
-                                        text="Cập nhật" @click="viewProductDetail(store)">
-                                    </BaseButton>
                                     <BaseButton class="m-button btn-white no-wrap" text="Xóa"
                                         @click="deleteStore(store)">
                                     </BaseButton>

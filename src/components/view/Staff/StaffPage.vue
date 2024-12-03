@@ -42,9 +42,6 @@
                                 <td>{{ getValueEnum(user.Role, "Role") }}</td>
                                 <td>{{ user.StoreName }}</td>
                                 <td>
-                                    <BaseButton class="m-button btn-white no-wrap" style="margin-right: 8px"
-                                        text="Cập nhật" @click="viewProductDetail(user)">
-                                    </BaseButton>
                                     <BaseButton class="m-button btn-white no-wrap" text="Xóa"
                                         @click="deleteStore(user)">
                                     </BaseButton>
@@ -91,7 +88,7 @@ const modeAdd = ref(true);
 
 const closePopup = () => {
     showDetail.value = false;
-    store.dispatch('getUser');
+    store.dispatch('getUserStaff');
 }
 
 const users = computed(() => store.state.user.users);
@@ -127,14 +124,14 @@ const confirmDeleteProduct = async () => {
     if (userDelete.value) {
         // Gọi hàm xóa sản phẩm trong store hoặc thực hiện hành động xóa
         await store.dispatch('deleteUser', userDelete.value.UserID);
-        store.dispatch('getUser');
+        store.dispatch('getUserStaff');
     }
 
     closeDeleteModal();
 };
 
 onMounted(() => {
-    store.dispatch('getUser');
+    store.dispatch('getUserStaff');
 })
 
 </script>

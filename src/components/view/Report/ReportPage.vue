@@ -1,82 +1,39 @@
 <template>
     <div class="container-sell">
-        <div class="title h-4" v-if="userInfo.Role != 3">
-            Lịch sử hoạt động
-        </div>
-        <div class="title h-4" v-else>
-            Danh sách đơn hàng
+        <div class="title h-4">
+            Báo cáo cửa hàng
         </div>
         <div class="content">
             <div class="tabs flex gap-8">
-                <BaseButton @click="showContent('orders')" class="m-button btn-white" v-if="userInfo?.Role != 2 && userInfo?.Role != 3 "
-                    :class="{ active: activeTab === 'orders' }" text="Đơn hàng đã tạo"></BaseButton>
-                <BaseButton @click="showContent('requests')" class="m-button btn-white" v-if="userInfo?.Role != 3"
-                    :class="{ active: activeTab === 'requests' }" text="Yêu Cầu Nhập Hàng
-                    Đã Tạo"></BaseButton>
+                <BaseButton @click="showContent('sales')" class="m-button btn-white" v-if="userInfo?.Role != 2"
+                    :class="{ active: activeTab === 'sales' }" text="Doanh số"></BaseButton>
+                <BaseButton @click="showContent('products')" class="m-button btn-white" v-if="userInfo?.Role != 3 && userInfo?.Role != 2"
+                    :class="{ active: activeTab === 'products' }" text="Sản phẩm"></BaseButton>
+                <BaseButton @click="showContent('inventory')" class="m-button btn-white" v-if="userInfo?.Role != 3 && userInfo.Role != 0 && userInfo?.Role != 2"
+                    :class="{ active: activeTab === 'inventory' }" text="Tồn kho"></BaseButton>
+                <BaseButton @click="showContent('store')" class="m-button btn-white" v-if="userInfo?.Role == 0"
+                    :class="{ active: activeTab === 'store' }" text="Cửa hàng"></BaseButton>
+                <BaseButton @click="showContent('storage')" class="m-button btn-white" v-if="userInfo?.Role == 2"
+                    :class="{ active: activeTab === 'storage' }" text="Xuất nhập kho"></BaseButton>
             </div>
             <div class="content-grid">
-                <div v-if="activeTab === 'orders'">
-                    <div class="product-grid">
-                        <table class="product-table">
-                            <thead>
-                                <tr class="fix-row">
-                                    <th v-if="userInfo.Role != 3">Khách hàng</th>
-                                    <th>Ngày tạo</th>
-                                    <th>Tổng tiền</th>
-                                    <th>Thanh toán</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="product in productOrders" :key="product.ProductOrderID"
-                                    @dblclick="viewOrderDetail(product)"
-                                    @mouseenter="hoveredProductId = product.ProductOrderID"
-                                    @mouseleave="hoveredProductId = null"
-                                    :class="{ 'row-hover': hoveredProductId === product.ProductOrderID }">
-                                    <td v-if="userInfo.Role != 3">{{ product.FullName }}</td>
-                                    <td>{{ formatDate(product.OrderDate) }}</td>
-                                    <td>{{ formatNumber(product.TotalPrice) }} đ</td>
-                                    <td>{{ getValueEnum(product.PaymentMethod, "PaymentMethod") }}</td>
-                                    <td>{{ getValueEnum(product.Status, "ProductOrderStatus") }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div v-if="activeTab === 'sales'">
+                    <ReportSales></ReportSales>
                 </div>
-                <div v-if="activeTab === 'requests'">
-                    <div class="product-grid">
-                        <table class="product-table">
-                            <thead>
-                                <tr class="fix-row">
-                                    <th>Tên cửa hàng</th>
-                                    <th>Ngày tạo</th>
-                                    <th>Ghi chú</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="product in productStorages" :key="product.ProdStorageOrderIDuctID"
-                                    @dblclick="viewProductStorageDetail(product)"
-                                    @mouseenter="hoveredProductId = product.StorageOrderID"
-                                    @mouseleave="hoveredProductId = null"
-                                    :class="{ 'row-hover': hoveredProductId === product.StorageOrderID }">
-                                    <td>{{ product.StoreName }}</td>
-                                    <td>{{ formatDate(product.CreateDate) }}</td>
-                                    <td>{{ product.Note }}</td>
-                                    <td>{{ getValueEnum(product.Status, "StorageOrderStatus") }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div v-if="activeTab === 'products'">
+                    <ReportProduct></ReportProduct>
+                </div>
+                <div v-if="activeTab === 'inventory' && userInfo.Role != 0">
+                    <ReportInventory></ReportInventory>
+                </div>
+                <div v-if="activeTab === 'store' && userInfo.Role == 0">
+                    <ReportStore></ReportStore>
+                </div>
+                <div v-if="activeTab === 'storage' && userInfo.Role == 2">
+                    <ReportStorage></ReportStorage>
                 </div>
             </div>
         </div>
-        <StorageOrderDetail :productStorageOrder="storageOrder" :isEdit="false" v-if="showStorageDetail"
-            @closeOrderDetail="closeProductStorageDetail">
-        </StorageOrderDetail>
-        <ProductOrderDetail v-if="showOrder" :isEdit="false" :productOrder="productOrder"
-            @closeOrderDetail="closeOrderDetail">
-        </ProductOrderDetail>
     </div>
 </template>
 
@@ -85,10 +42,13 @@ import BaseButton from '@/components/base/button/BaseButton.vue';
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { formatDate, getValueEnum } from '@/common/commonFn';
-import StorageOrderDetail from '../ProductStore/StorageOrderDetail.vue';
-import ProductOrderDetail from '../ProductOrder/ProductOrderDetail.vue';
+import ReportSales from './ReportSales.vue';
+import ReportProduct from './ReportProduct.vue';
+import ReportInventory from './ReportInventory.vue';
+import ReportStore from './ReportStore.vue';
+import ReportStorage from './ReportStorage.vue';
 
-const activeTab = ref('orders');
+const activeTab = ref(null);
 const showStorageDetail = ref(false);
 const showOrder = ref(false);
 
@@ -106,36 +66,12 @@ const getCookie = (name) => {
 
 const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
-const productOrders = computed(() => store.state.productOrder.dataProductOrders);
-const productStorages = computed(() => store.state.storageOrder.dataStorageOrders);
-
 const productOrder = ref(null);
 const storageOrder = ref(null);
 
 const showContent = (tab) => {
     activeTab.value = tab;
 };
-
-const closeProductStorageDetail = () => {
-    showStorageDetail.value = false;
-}
-
-const viewProductStorageDetail = async (product) => {
-    storageOrder.value = product;
-    await store.dispatch('getStorageOrderDetail', product.StorageOrderID);
-    showStorageDetail.value = true;
-}
-
-const closeOrderDetail = () => {
-    showOrder.value = false;
-    store.dispatch('getOrderUser', userInfo.value.UserID);
-}
-
-const viewOrderDetail = async (product) => {
-    productOrder.value = product;
-    await store.dispatch('getOrderDetail', product.ProductOrderID);
-    showOrder.value = true;
-}
 
 const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -145,19 +81,10 @@ const formatNumber = (number) => {
 };
 
 onMounted(() => {
-    let storeID = '00000000-0000-0000-0000-000000000000';
-    if (userInfo.value.Role == 1) {
-        storeID = userInfo.value.StoreID;
-    }
-
-    if (userInfo.value.Role == 3) {
-        store.dispatch('getOrderUser', userInfo.value.UserID);
-    } else if (userInfo.value.Role == 2) {
-        activeTab.value = 'requests'
-        store.dispatch('getAllStorageOrderByStorage', storeID);
+    if (userInfo.value.Role == 2) {
+        activeTab.value = 'storage';
     } else {
-        store.dispatch('getOrderUser', userInfo.value.UserID);
-        store.dispatch('getAllStorageOrderByStorage', storeID);
+        activeTab.value = 'sales';
     }
 })
 </script>

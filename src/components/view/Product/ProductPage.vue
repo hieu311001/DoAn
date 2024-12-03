@@ -266,10 +266,10 @@ const closeCart = (resetCart) => {
     loadProduct();
 }
 
-const closeProduct = () => {
+const closeProduct = async () => {
+    await loadProduct();
     isUpdate.value = false;
     showDetail.value = false;
-    loadProduct();
 }
 
 const getStatus = (stock) => (stock === 0 ? 'Hết hàng' : stock <= 15 ? 'Sắp hết' : 'Còn hàng');
@@ -328,12 +328,12 @@ const confirmDeleteProduct = async () => {
     closeDeleteModal();
 };
 
-const loadProduct = () => {
+const loadProduct = async () => {
     let storeID = '00000000-0000-0000-0000-000000000000';
     if (userInfo.value.Role == 1) {
         storeID = userInfo.value.StoreID;
     }
-    store.dispatch('getAllProduct', storeID);
+    await store.dispatch('getAllProduct', storeID);
 }
 
 onMounted(() => {

@@ -168,6 +168,13 @@ const createOrder = () => {
         return;
     }
 
+    let product = localCart.value.find(f=> f.TotalAmount == 0);
+
+    if (product) {
+        alert("Số lượng sản phẩm trong kho không đủ");
+        return;
+    }
+
     let productOrderID = generateGUID();
     let paramMaster = {
         ProductOrderID: productOrderID,

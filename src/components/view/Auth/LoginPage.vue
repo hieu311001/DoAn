@@ -58,7 +58,7 @@ const user = reactive({
 const login = async () => {
    var loginSuccess = await store.dispatch('login', user);
    if (loginSuccess) {
-        router.push({ name: 'sell' });
+        router.push({ name: 'intro' });
         setCookie('token', userInfo.value.AccessToken, 1);
         setCookie('userInfo', JSON.stringify(userInfo.value), 1);
    }

@@ -5,8 +5,9 @@
       <modal-manager></modal-manager>
     </div>
     <div v-else>
-      <login-page v-if="!token"></login-page>
-      <register-page v-else></register-page>
+      <router-view></router-view>
+      <!-- <login-page></login-page>
+      <register-page></register-page> -->
     </div>
     <ToastMessage></ToastMessage>
   </div>

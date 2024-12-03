@@ -135,7 +135,10 @@ const togglePopup = () => {
     min-width: 1036px;
 }
 .nav-layout {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    position: relative;
     display: flex;
+    z-index: 999;
     justify-content: space-between;
 }
 .nav-left, .nav-right, .nav-left__logo {
@@ -209,6 +212,7 @@ const togglePopup = () => {
     height: 32px;
     background-size: 32px;
     margin-right: 12px;
+    background-image: url('https://phuotbuistore.com/wp-content/uploads/2018/11/Untitled-1.png');
 }
 
 /* Styles for the box under avatar */

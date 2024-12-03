@@ -21,7 +21,7 @@ const mutations = {
         state.userInfo = null;
     },
 
-    getUser(state, payload) {
+    getUserStaff(state, payload) {
         state.users = payload;
     },
 
@@ -79,11 +79,11 @@ const actions = {
      * Đăng nhập
      * @param {*} context 
      */
-    async getUser(context, param) {
+    async getUserStaff(context, param) {
         try {
-            const res = await axios.get(`${constants.API_URL}/api/User`)
+            const res = await axios.get(`${constants.API_URL}/api/User/staff`)
             if (res.data) {
-                context.commit("getUser", res.data);
+                context.commit("getUserStaff", res.data);
                 return true;
             }
         } catch (error) {
@@ -132,6 +132,22 @@ const actions = {
             const res = await axios.post(`${constants.API_URL}/api/User`, param)
             if (res.data) {
                 handleShowToast(context, "Thêm nhân viên thành công", 1)
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Đăng nhập
+     * @param {*} context 
+     */
+    async register(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/User`, param)
+            if (res.data) {
+                handleShowToast(context, "Đăng ký thành công", 1)
                 return true;
             }
         } catch (error) {

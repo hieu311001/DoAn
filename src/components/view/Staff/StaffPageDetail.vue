@@ -2,7 +2,8 @@
     <div class="modal-container">
         <div class="popup-container">
             <div class="popup-header">
-                <h2>Thêm nhân viên</h2>
+                <h2 v-if="modeAdd">Thêm nhân viên</h2>
+                <h2 v-else>Thông tin nhân viên</h2>
                 <div class="icon-close" @click="closePopup">
                     <icon class="icon icon-exit"></icon>
                 </div>
@@ -22,8 +23,9 @@
                 </div>
                 <div class="input-group">
                     <label for="store">Thuộc cửa hàng:</label>
-                    <BaseCombobox cbbClass="cb-store" id="category" propValue="StoreID" propText="StoreText" placeholder="Chọn cửa hàng"
-                        :data=storeInfo v-model="employeeInfo.StoreID" :valueCombobox="employeeInfo.StoreID" />
+                    <BaseCombobox cbbClass="cb-store" id="category" propValue="StoreID" propText="StoreText"
+                        placeholder="Chọn cửa hàng" :data=storeInfo v-model="employeeInfo.StoreID"
+                        :valueCombobox="employeeInfo.StoreID" />
                 </div>
                 <div class="input-group">
                     <label for="role">Vai trò:</label>
@@ -57,6 +59,10 @@ const store = useStore();
 const storeInfo = computed(() => store.state.stores.storeInfo);
 const roleInfo = [
     {
+        Role: 0,
+        RoleName: "Quản lý"
+    },
+    {
         Role: 1,
         RoleName: "Nhân viên"
     },
@@ -72,7 +78,7 @@ const employeeInfo = ref({
     Email: '',
     Phone: '',
     Role: 1, // Default value for role
-    StoreID: null
+    StoreID: "00000000-0000-0000-0000-000000000000"
 });
 
 const stores = computed(() => store.state.stores.allStores);
@@ -84,6 +90,10 @@ const closePopup = () => {
 
 // Xử lý thêm nhân viên
 const submitEmployee = async () => {
+    if (employeeInfo.value.Role == 0) {
+        employeeInfo.value.StoreID = "00000000-0000-0000-0000-000000000000";
+    }
+    
     if (props.modeAdd) {
         await store.dispatch('addUser', {
             ...employeeInfo.value,
@@ -107,7 +117,7 @@ onMounted(() => {
             FullName: '',
             Email: '',
             Phone: '',
-            Role: 1, 
+            Role: 1,
             StoreID: null
         }
     }

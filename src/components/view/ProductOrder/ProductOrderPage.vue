@@ -33,14 +33,6 @@
                                 </div>
                             </div>
                             <div class="filter-item">
-                                <label class="m-label">Thương hiệu</label>
-                                <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn thương hiệu" propValue="Value"
-                                        propText="Text" :data=dataBranch @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
-                                </div>
-                            </div>
-                            <div class="filter-item">
                                 <label class="m-label">Giá</label>
                                 <div class="filter-object__input">
                                     <BaseCombobox id="category" placeholder="Chọn khoảng giá" propValue="Value"
@@ -134,21 +126,6 @@ const dataCategory = [
     },
     {
         Text: "Đồ phượt",
-        Value: ""
-    },
-]
-
-const dataBranch = [
-    {
-        Text: "Gucci",
-        Value: ""
-    },
-    {
-        Text: "Balenciaga",
-        Value: ""
-    },
-    {
-        Text: "Adidas",
         Value: ""
     },
 ]

@@ -3,18 +3,18 @@
         <div class="menu-container">
             <div class="left-container">
                 <div class="menu-item-container">
-                    <router-link to="/dashboard" class="menu-focus" active-class="active">
+                    <router-link to="/intro" class="menu-focus" active-class="active">
                         <div class="menu-item">
                             <div class="menu-item__icon">
                                 <icon class="icon icon-tq"></icon>
                             </div>
-                            <div class="menu-item__text">Dashboard</div>
+                            <div class="menu-item__text">Giới thiệu</div>
                         </div>
                     </router-link>
                     <router-link to="/sell" class="menu-focus" active-class="active" v-if="user?.Role == 1 || user?.Role == 3">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-td"></icon>
                             </div>
                             <div class="menu-item__text" v-if="user?.Role == 1">Bán hàng</div>
                             <div class="menu-item__text" v-if="user?.Role == 3">Gian hàng</div>
@@ -23,7 +23,7 @@
                     <router-link to="/product" class="menu-focus" active-class="active" v-if="user?.Role != 3">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-kt"></icon>
                             </div>
                             <div class="menu-item__text">Quản lý sản phẩm</div>
                         </div>
@@ -31,7 +31,7 @@
                     <router-link to="/store" class="menu-focus" active-class="active" v-if="user?.Role == 0">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-qd"></icon>
                             </div>
                             <div class="menu-item__text">Quản lý cửa hàng</div>
                         </div>
@@ -39,7 +39,7 @@
                     <router-link to="/staff" class="menu-focus" active-class="active" v-if="user?.Role == 0">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-hs"></icon>
                             </div>
                             <div class="menu-item__text">Quản lý nhân viên</div>
                         </div>
@@ -47,7 +47,7 @@
                     <router-link to="/product-order" class="menu-focus" active-class="active" v-if="user?.Role == 1">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-tc"></icon>
                             </div>
                             <div class="menu-item__text">Quản lý đơn hàng</div>
                         </div>
@@ -55,7 +55,7 @@
                     <router-link to="/store-order" class="menu-focus" active-class="active" v-if="user?.Role == 2">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-bc"></icon>
                             </div>
                             <div class="menu-item__text">Yêu cầu nhập hàng</div>
                         </div>
@@ -63,15 +63,16 @@
                     <router-link to="/history" class="menu-focus" active-class="active" v-if="user?.Role != 0">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-dm"></icon>
                             </div>
-                            <div class="menu-item__text">Lịch sử hoạt động</div>
+                            <div class="menu-item__text"  v-if="user?.Role != 3">Lịch sử hoạt động</div>
+                            <div class="menu-item__text" v-else>Danh sách đơn hàng</div>
                         </div>
                     </router-link>
                     <router-link to="/report" class="menu-focus" active-class="active" v-if="user?.Role != 3">
                         <div class="menu-item">
                             <div class="menu-item__icon">
-                                <icon class="icon icon-tq"></icon>
+                                <icon class="icon icon-tl"></icon>
                             </div>
                             <div class="menu-item__text">Báo cáo</div>
                         </div>
@@ -105,12 +106,11 @@ const user = ref(JSON.parse(getCookie('userInfo')));
     width: 204px;
     transition: width .2s;
     z-index: 12;
-    box-shadow: inset 0 1.5px 2px 0 rgba(0,0,0,.1);
+    box-shadow: inset 0 0 2px 0 rgba(0,0,0,0.5);
 }
 
 .menu-container{
     height: 100%;
-    border-right: 1px solid #000;
 }
 
 .left-container{

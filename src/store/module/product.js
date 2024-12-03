@@ -4,6 +4,7 @@ import axios from "axios";
 
 const state = {
     dataProducts: [],
+    dataProductReport: [],
     dataProductDetail: {}
 }
 
@@ -14,6 +15,10 @@ const mutations = {
 
     getProductByID(state, payload) {
         state.dataProductDetail = payload;
+    },
+
+    getProductByProductOrder(state, payload) {
+        state.dataProductReport = payload;
     }
 }
 
@@ -27,6 +32,36 @@ const actions = {
             const res = await axios.get(`${constants.API_URL}/api/Product/get-all/${param}`)
             if (res.data) {
                 context.commit("getAllProduct", res.data)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     */
+    async getProductByProductOrder(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/Product/get-report`, param)
+            if (res.data) {
+                context.commit("getProductByProductOrder", res.data)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Lấy tất cả bản ghi danh hiệu thi đua
+     * @param {*} context 
+     */
+    async getProductReportByStorageOrder(context, param) {
+        try {
+            const res = await axios.post(`${constants.API_URL}/api/Product/get-report-storage`, param)
+            if (res.data) {
+                context.commit("getProductByProductOrder", res.data)
             }
         } catch (error) {
             console.log(error);

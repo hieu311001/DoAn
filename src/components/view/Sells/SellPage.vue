@@ -7,8 +7,8 @@
             <div class="content-filter flex space-between">
                 <div class="filter-left flex gap-8">
                     <div class="list-search">
-                        <BaseInput showIcon="true" v-model="keyword" inputClass="m-input"
-                            placeholder="Tìm theo tên, mã sản phẩm" @keypress.enter="handleSearch" :clearInput="true"
+                        <BaseInput showIcon="true" v-model="filterValue.text" inputClass="m-input"
+                            placeholder="Tìm theo tên sản phẩm" @keypress.enter="handleSearch" :clearInput="true"
                             @clearInput="handleSearch">
                         </BaseInput>
                     </div>
@@ -28,24 +28,16 @@
                                 <label class="m-label">Danh mục sản phẩm</label>
                                 <div class="filter-object__input">
                                     <BaseCombobox id="category" placeholder="Chọn loại sản phẩm" propValue="Value"
-                                        propText="Text" :data=dataCategory @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
-                                </div>
-                            </div>
-                            <div class="filter-item">
-                                <label class="m-label">Thương hiệu</label>
-                                <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn thương hiệu" propValue="Value"
-                                        propText="Text" :data=dataBranch @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
+                                        propText="Text" :data=dataCategory v-model="filterValue.category"
+                                        :valueCombobox="filterValue.category"/>
                                 </div>
                             </div>
                             <div class="filter-item">
                                 <label class="m-label">Giá</label>
                                 <div class="filter-object__input">
                                     <BaseCombobox id="category" placeholder="Chọn khoảng giá" propValue="Value"
-                                        propText="Text" :data=dataPrice @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
+                                        propText="Text" :data=dataPrice v-model="filterValue.price"
+                                        :valueCombobox="filterValue.price"/>
                                 </div>
                             </div>
                         </div>
@@ -55,7 +47,7 @@
                                 </BaseButton>
                             </div>
                             <div class="filter-btn__save">
-                                <BaseButton class="m-button btn-blue" text="Áp dụng" @click="handleFilter"></BaseButton>
+                                <BaseButton class="m-button btn-blue" text="Áp dụng" @click="handleSearch"></BaseButton>
                             </div>
                         </div>
                     </div>
@@ -69,7 +61,7 @@
             </div>
             <div class="content-grid">
                 <div class="product-grid">
-                    <div class="product-box" v-for="product in dataCells" :key="product.ProductID"
+                    <div class="product-box" v-for="product in dataSellClone" :key="product.ProductID"
                         @dblclick="viewProductDetail(product)">
                         <div class="image-container">
                             <img :src="product.Image" alt="Product Image" class="product-image" />
@@ -108,10 +100,35 @@ import ProductDetailPage from './ProductDetailPage.vue';
 
 const showFilter = ref(false);
 
+const filterValue = ref({
+    text: '',
+    category: null,
+    price: null
+})
+
+const handleSearch = () => {
+    dataSellClone.value = dataSells.value;
+    if (filterValue.value.text) {
+        dataSellClone.value = dataSellClone.value.filter(item => item.ProductName.toLowerCase().includes(filterValue.value.text.toLowerCase()));
+    }
+
+    if (filterValue.value.category) {
+        dataSellClone.value = dataSellClone.value.filter(item => item.ProductCategory == filterValue.value.category);
+    }
+
+    if (filterValue.value.price == 1) {
+        dataSellClone.value = dataSellClone.value.slice().sort((a, b) => a.Price - b.Price);
+    } else if (filterValue.value.price == 2){
+        dataSellClone.value = dataSellClone.value.slice().sort((a, b) => b.Price - a.Price);
+    }
+
+    showFilter.value = false;
+}
+
 const dataCategory = [
     {
         Text: "Tất cả",
-        Value: ""
+        Value: 0
     },
     {
         Text: "Mũ",
@@ -135,38 +152,15 @@ const dataCategory = [
     },
 ]
 
-const dataBranch = [
-    {
-        Text: "Gucci",
-        Value: ""
-    },
-    {
-        Text: "Balenciaga",
-        Value: ""
-    },
-    {
-        Text: "Adidas",
-        Value: ""
-    },
-]
-
 const dataPrice = [
     {
-        Text: "< 500.000",
-        Value: ""
+        Text: "Từ thấp lên cao",
+        Value: 1
     },
     {
-        Text: "500.000 -> 1.000.000",
-        Value: ""
-    },
-    {
-        Text: "1.000.000 -> 3.000.000",
-        Value: ""
-    },
-    {
-        Text: "> 3.000.000",
-        Value: ""
-    },
+        Text: "Từ cao xuống thấp",
+        Value: 2
+    }
 ]
 
 const store = useStore();
@@ -178,7 +172,8 @@ const getCookie = (name) => {
   return null; // Trả về null nếu không tìm thấy cookie
 }
 
-const dataCells = computed(() => store.state.sell.dataSell);
+const dataSells = computed(() => store.state.sell.dataSell);
+const dataSellClone = ref(null);
 const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 const refFilterBtn = ref("null");
@@ -241,6 +236,7 @@ const handleToggleFilter = () => {
 
 const handleCloseFilter = () => {
     showFilter.value = false;
+    dataSellClone.value = dataSells.value;
 }
 
 const addToCart = (product) => {
@@ -258,12 +254,14 @@ const formatNumber = (number) => {
     }).format(number);
 };
 
-onMounted(() => {
+onMounted(async () => {
     let storeID = '00000000-0000-0000-0000-000000000000';
     if (userInfo.value.Role == 1) {
         storeID = userInfo.value.StoreID;
     }
-    store.dispatch('getAllProductSell', storeID);
+    await store.dispatch('getAllProductSell', storeID);
+
+    dataSellClone.value = dataSells.value;
 })
 
 </script>
@@ -341,10 +339,11 @@ onMounted(() => {
         height: calc(100vh - 196px);
         overflow: auto;
         margin-top: 12px;
+        width: 100%;
 
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Đảm bảo có tối đa 4 cột */
+            grid-template-columns: repeat(4, minmax(200px, 1fr)); /* Đảm bảo có tối đa 4 cột */
             /* 4 sản phẩm mỗi hàng */
             gap: 20px;
         }
@@ -458,7 +457,7 @@ onMounted(() => {
 
     /* Khi chiều rộng màn hình nhỏ hơn 768px */
     .product-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-columns: repeat(2, minmax(200px, 1fr)) !important; /* Đảm bảo có tối đa 4 cột */
         /* Chuyển thành 2 sản phẩm mỗi hàng */
     }
 }

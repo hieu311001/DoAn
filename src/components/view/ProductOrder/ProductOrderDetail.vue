@@ -14,9 +14,9 @@
 
             <div class="customer-info">
                 <h3>Khách Hàng</h3>
-                <p><strong>Tên khách hàng:</strong> {{ productOrder.FullName }}</p>
-                <p><strong>Số điện thoại:</strong> {{ productOrder.PhoneNumber }}</p>
-                <p><strong>Địa chỉ giao hàng:</strong> {{ productOrder.Address }}</p>
+                <p><strong>Tên khách hàng:</strong> {{ productOrderDetail[0].FullName }}</p>
+                <p><strong>Số điện thoại:</strong> {{ productOrderDetail[0].PhoneNumber }}</p>
+                <p><strong>Địa chỉ giao hàng:</strong> {{ productOrderDetail[0].Address }}</p>
             </div>
 
             <div class="order-summary">
@@ -54,14 +54,17 @@
             <div class="order-status flex">
                 <p><strong>Trạng Thái Đơn Hàng:</strong></p>
                 <BaseCombobox id="category" :disabled="!isEdit || isNotChange" propValue="Value" propText="Text"
-                    :valueCombobox="productOrder.Status" v-model="productOrder.Status" :data=orderStatus @getValueCombobox="getDataCombobox"
-                    :resetValue="resetValue"/>
+                    :valueCombobox="productOrder.Status" v-model="productOrder.Status" :data=orderStatus
+                    @getValueCombobox="getDataCombobox" :resetValue="resetValue" />
             </div>
 
-            <div class="order-footer" v-if="isEdit && !isNotChange">
-                <div class="filter-bot flex gap-8">
-                <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder" :disabled="isNotChange">
+            <div class="order-footer">
+                <div class="filter-bot flex gap-8" v-if="isEdit && !isNotChange">
+                    <BaseButton class="m-button btn-blue" text="Cập nhật" @click="updateOrder" :disabled="isNotChange">
                     </BaseButton>
+                </div>
+                <div class="filter-bot flex gap-8" v-if="userInfo.Role == 3 & productOrder.Status == 0">
+                    <button @click="cancelOrder" class="btn-add">Hủy đơn hàng</button>
                 </div>
             </div>
         </div>
@@ -86,6 +89,15 @@ const props = defineProps({
 })
 
 const store = useStore();
+
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 const productOrderDetail = computed(() => store.state.productOrder.dataProductOrderDetail);
 
@@ -114,13 +126,21 @@ const orderStatus = [
 const status = ref('Đang xử lý');
 let isNotChange = ref(false);
 
-const updateOrder = () => {
-    store.dispatch('updateOrder', {
+const updateOrder = async () => {
+    await store.dispatch('updateOrder', {
         ...productOrder.value,
         Status: productOrder.value.Status
     });
     closeOrderDetail();
 };
+
+const cancelOrder = async () => {
+    await store.dispatch('updateOrder', {
+        ...productOrder.value,
+        Status: 3
+    });
+    closeOrderDetail();
+}
 
 const closeOrderDetail = () => {
     emit('closeOrderDetail');
@@ -135,7 +155,7 @@ const formatNumber = (number) => {
 
 onMounted(() => {
     nextTick(() => {
-        if (productOrder.value.Status == 2 || productOrder.value.Status ==  3) {
+        if (productOrder.value.Status == 2 || productOrder.value.Status == 3) {
             isNotChange.value = true;
         } else {
             isNotChange.value = false;
@@ -256,5 +276,24 @@ onMounted(() => {
 .filter-bot {
     justify-content: flex-end;
     padding-top: 12px;
+}
+
+.btn-add,
+.btn-update {
+    padding: 8px 16px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.btn-add {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-add:hover {
+    background-color: #0056b3;
 }
 </style>

@@ -95,7 +95,7 @@ const removeFromCart = (productId) => {
     }
 };
 
-const createStoreOrder = () => {
+const createStoreOrder = async () => {
     if (localCart.value.length <= 0) {
         showToastWarning(store, "Không có sản phẩm nào");
         return;
@@ -122,12 +122,12 @@ const createStoreOrder = () => {
     })
 
     if (userInfo.value.Role == 2) {
-        store.dispatch('createStoreOrderByStorage', {
+        await store.dispatch('createStoreOrderByStorage', {
             storeOrder: paramMaster,
             storeOrderDetails: paramDetail,
         });
     } else {
-        store.dispatch('createStoreOrder', {
+        await store.dispatch('createStoreOrder', {
             storeOrder: paramMaster,
             storeOrderDetails: paramDetail,
         });
