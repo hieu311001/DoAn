@@ -25,7 +25,15 @@ const mutations = {
         state.users = payload;
     },
 
+    getUserCustomer(state, payload) {
+        state.users = payload;
+    },
+
     getUserByID(state, payload) {
+        state.userDetail = payload;
+    },
+
+    getUserCustomerByID(state, payload) {
         state.userDetail = payload;
     }
 }
@@ -95,11 +103,43 @@ const actions = {
      * Đăng nhập
      * @param {*} context 
      */
+    async getUserCustomer(context, param) {
+        try {
+            const res = await axios.get(`${constants.API_URL}/api/User/customer`)
+            if (res.data) {
+                context.commit("getUserCustomer", res.data);
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Đăng nhập
+     * @param {*} context 
+     */
     async getUserByID(context, param) {
         try {
             const res = await axios.get(`${constants.API_URL}/api/User/id?id=${param}`)
             if (res.data) {
                 context.commit("getUserByID", res.data);
+                return true;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    /**
+     * Đăng nhập
+     * @param {*} context 
+     */
+    async getUserCustomerByID(context, param) {
+        try {
+            const res = await axios.get(`${constants.API_URL}/api/User/customer/${param}`)
+            if (res.data) {
+                context.commit("getUserCustomerByID", res.data);
                 return true;
             }
         } catch (error) {

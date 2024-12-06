@@ -27,8 +27,13 @@
                             class="m-input input-product" :disabled="!isAdd">
                     </div>
                     <div class="item">
-                        <h3>Giá:</h3>
+                        <h3>Giá bán:</h3>
                         <input v-model.number="product.Price" placeholder="Nhập giá sản phẩm" type="number"
+                            class="m-input input-product" :disabled="!isAdd" />
+                    </div>
+                    <div class="item" v-if="userInfo.Role == 0">
+                        <h3>Giá nhập:</h3>
+                        <input v-model.number="product.OriginalPrice" placeholder="Nhập giá sản phẩm" type="number"
                             class="m-input input-product" :disabled="!isAdd" />
                     </div>
                     <div class="item">
@@ -50,7 +55,7 @@
                 </div>
             </div>
             <div class="product-description">
-                <h3>Diễn giải:</h3>
+                <h3>Mô tả sản phẩm:</h3>
                 <div v-html="product.Description" ref="refDes" :contenteditable="isAdd == 1 ? true : false"
                     class="description-preview"></div>
             </div>
@@ -110,6 +115,15 @@ const dataCategory = [
 const store = useStore();
 
 const refDes = ref(null);
+
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null; // Trả về null nếu không tìm thấy cookie
+}
+
+const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
 const product = ref({
     Image: null,
@@ -228,6 +242,7 @@ onMounted(() => {
         border: 1px solid #ddd;
         border-radius: 5px;
         background-color: #f9f9f9;
+        min-height: 100px;
     }
 
     .product-image {

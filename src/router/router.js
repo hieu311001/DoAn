@@ -12,6 +12,7 @@ import StorePage from '@/components/view/Store/StorePage.vue';
 import StaffPage from '@/components/view/Staff/StaffPage.vue';
 import IntroducePage from '@/components/view/Introduce/IntroducePage.vue';
 import ReportPage from '@/components/view/Report/ReportPage.vue';
+import CustomerPage from '@/components/view/Customer/CustomerPage.vue';
 
 const routes = [
   {
@@ -64,6 +65,14 @@ const routes = [
     components: {
       default: SellPage,
       content: SellPage, 
+    },
+  },
+  {
+    path: '/customer',
+    name: 'customer',
+    components: {
+      default: CustomerPage,
+      content: CustomerPage, 
     },
   },
   {

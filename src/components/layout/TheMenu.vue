@@ -44,6 +44,14 @@
                             <div class="menu-item__text">Quản lý nhân viên</div>
                         </div>
                     </router-link>
+                    <router-link to="/customer" class="menu-focus" active-class="active" v-if="user?.Role == 0">
+                        <div class="menu-item">
+                            <div class="menu-item__icon">
+                                <icon class="icon icon-hs"></icon>
+                            </div>
+                            <div class="menu-item__text">Quản lý khách hàng</div>
+                        </div>
+                    </router-link>
                     <router-link to="/product-order" class="menu-focus" active-class="active" v-if="user?.Role == 1">
                         <div class="menu-item">
                             <div class="menu-item__icon">
