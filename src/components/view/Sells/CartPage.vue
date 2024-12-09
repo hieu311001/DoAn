@@ -44,7 +44,7 @@
                 <div class="mt-3 info-pay">
                     <div class="pay-info">
                         <div class="flex gap-8 mt-3" v-if="userInfo.Role == 3">
-                            <p><strong>Cửa hàng:</strong></p>
+                            <p class="label"><strong>Cửa hàng:</strong></p>
                             <BaseCombobox cbbClass="cb-store" id="category" propValue="StoreID" propText="StoreText" :data=storeInfo
                                  @getValueCombobox="getDataCombobox" v-model="customer.Store"/>
                         </div>
@@ -57,6 +57,8 @@
                                     <input v-model="customer.Name" type="text" class="m-input input-product" />
                                 </div>
                             </div>
+                        </div>
+                        <div class="flex gap-8">
                             <div class="label-item flex gap-8 mt-3">
                                 <div class="label">
                                     SĐT:
@@ -67,7 +69,7 @@
                             </div>
                         </div>
                         <div class="flex gap-8 mt-3">
-                            <div class="label-item flex gap-8 mt-3">
+                            <div class="label-item flex gap-8">
                                 <div class="label">
                                     Địa chỉ:
                                 </div>
@@ -91,7 +93,6 @@
                         <div class="qr-pay mt-2 flex gap-8" v-if="paymentMethod == 1">
                             <div class="text">Vui lòng quét mã để thanh toán</div>
                             <div class="qr-image">
-                                <img width="160" height="160" src="" class="" alt="">
                             </div>
                         </div>
                     </div>
@@ -137,7 +138,9 @@ const getCookie = (name) => {
 }
 
 const userInfo = ref(JSON.parse(getCookie('userInfo')));
-const storeInfo = computed(() => store.state.stores.storeInfo);
+const storeInfo = computed(() => {
+    return store.state.stores.storeInfo?.filter(f => f.StoreID != '00000000-0000-0000-0000-000000000000');
+});
 
 const paymentMethod = ref(0);
 
@@ -372,5 +375,16 @@ td {
     background-color: #007bff;
     /* Màu vòng tròn nhỏ bên trong */
     border-radius: 50%;
+}
+
+.qr-image {
+    background: url('@/assets/img/qr.jpg') no-repeat center;
+    width: 160px;
+    height: 160px;
+    background-size: contain;
+}
+
+.label {
+    min-width: 80px;
 }
 </style>

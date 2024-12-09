@@ -7,7 +7,7 @@
             <div class="content-filter flex space-between">
                 <div class="filter-left flex gap-8">
                     <div class="list-search">
-                        <BaseInput showIcon="true" v-model="keyword" inputClass="m-input"
+                        <BaseInput showIcon="true" v-model="filterValue.text" inputClass="m-input"
                             placeholder="Tìm theo tên, mã sản phẩm" @keypress.enter="handleSearch" :clearInput="true"
                             @clearInput="handleSearch">
                         </BaseInput>
@@ -28,24 +28,24 @@
                                 <label class="m-label">Danh mục sản phẩm</label>
                                 <div class="filter-object__input">
                                     <BaseCombobox id="category" placeholder="Chọn loại sản phẩm" propValue="Value"
-                                        propText="Text" :data=dataCategory @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
-                                </div>
-                            </div>
-                            <div class="filter-item">
-                                <label class="m-label">Thương hiệu</label>
-                                <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn thương hiệu" propValue="Value"
-                                        propText="Text" :data=dataBranch @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
+                                        propText="Text" :data=dataCategory v-model="filterValue.category"
+                                        :valueCombobox="filterValue.category" />
                                 </div>
                             </div>
                             <div class="filter-item">
                                 <label class="m-label">Giá</label>
                                 <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn khoảng giá" propValue="Value"
-                                        propText="Text" :data=dataPrice @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
+                                    <BaseCombobox id="price" placeholder="Chọn khoảng giá" propValue="Value"
+                                        propText="Text" :data=dataPrice v-model="filterValue.price"
+                                        :valueCombobox="filterValue.price" />
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="m-label">Trạng thái</label>
+                                <div class="filter-object__input">
+                                    <BaseCombobox id="status" placeholder="Chọn trạng thái" propValue="Value"
+                                        propText="Text" :data=dataStatus v-model="filterValue.status"
+                                        :valueCombobox="filterValue.status" />
                                 </div>
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                                 </BaseButton>
                             </div>
                             <div class="filter-btn__save">
-                                <BaseButton class="m-button btn-blue" text="Áp dụng" @click="handleFilter"></BaseButton>
+                                <BaseButton class="m-button btn-blue" text="Áp dụng" @click="handleSearch"></BaseButton>
                             </div>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in products" :key="product.ProductID"
+                            <tr v-for="product in dataSellClone" :key="product.ProductID"
                                 @dblclick="viewProductDetail(product)"
                                 @mouseenter="hoveredProductId = product.ProductID" @mouseleave="hoveredProductId = null"
                                 :class="{ 'row-hover': hoveredProductId === product.ProductID }">
@@ -156,61 +156,58 @@ import ProductStorageDetail from './ProductStorageDetail.vue';
 
 const showFilter = ref(false);
 
+
 const dataCategory = [
     {
         Text: "Tất cả",
-        Value: ""
+        Value: 0
+    },
+    {
+        Text: "Mũ",
+        Value: 1
     },
     {
         Text: "Áo",
-        Value: ""
+        Value: 2
     },
     {
         Text: "Quần",
-        Value: ""
+        Value: 3
     },
     {
         Text: "Giày dép",
-        Value: ""
+        Value: 4
     },
     {
-        Text: "Đồ phượt",
-        Value: ""
-    },
-]
-
-const dataBranch = [
-    {
-        Text: "Gucci",
-        Value: ""
-    },
-    {
-        Text: "Balenciaga",
-        Value: ""
-    },
-    {
-        Text: "Adidas",
-        Value: ""
+        Text: "Phụ kiện",
+        Value: 5
     },
 ]
 
 const dataPrice = [
     {
-        Text: "< 500.000",
-        Value: ""
+        Text: "Từ thấp lên cao",
+        Value: 1
     },
     {
-        Text: "500.000 -> 1.000.000",
-        Value: ""
+        Text: "Từ cao xuống thấp",
+        Value: 2
+    }
+]
+
+const dataStatus = [
+    {
+        Text: "Tất cả",
+        Value: 1
     },
     {
-        Text: "1.000.000 -> 3.000.000",
-        Value: ""
+        Text: "Còn hàng",
+        Value: 2
     },
     {
-        Text: "> 3.000.000",
-        Value: ""
-    },
+        Text: "Hết hàng",
+        Value: 3
+    }
 ]
 
 const store = useStore();
@@ -234,6 +231,40 @@ const cart = ref([]);
 const showCart = ref(false);
 const showDetail = ref(false);
 const productDetail = ref(null);
+
+const dataSellClone = ref(null);
+
+const filterValue = ref({
+    text: '',
+    category: null,
+    price: null,
+    status: null,
+})
+
+const handleSearch = () => {
+    dataSellClone.value = products.value;
+    if (filterValue.value.text) {
+        dataSellClone.value = dataSellClone.value.filter(item => item.ProductName.toLowerCase().includes(filterValue.value.text.toLowerCase()));
+    }
+
+    if (filterValue.value.category) {
+        dataSellClone.value = dataSellClone.value.filter(item => item.ProductCategory == filterValue.value.category);
+    }
+
+    if (filterValue.value.price == 1) {
+        dataSellClone.value = dataSellClone.value.slice().sort((a, b) => a.Price - b.Price);
+    } else if (filterValue.value.price == 2){
+        dataSellClone.value = dataSellClone.value.slice().sort((a, b) => b.Price - a.Price);
+    }
+
+    if (filterValue.value.status == 2) {
+        dataSellClone.value = dataSellClone.value.filter(f => f.TotalAmount > 15);
+    } else if (filterValue.value.status == 3){
+        dataSellClone.value = dataSellClone.value.filter(f => f.TotalAmount <= 15);
+    }
+
+    showFilter.value = false;
+}
 
 // Quản lý trạng thái hover và popup
 const hoveredProductId = ref(null);
@@ -287,6 +318,7 @@ const handleToggleFilter = () => {
 
 const handleCloseFilter = () => {
     showFilter.value = false;
+    dataSellClone.value = products.value;
 }
 
 const addToCart = (product) => {
@@ -336,8 +368,9 @@ const loadProduct = async () => {
     await store.dispatch('getAllProduct', storeID);
 }
 
-onMounted(() => {
-    loadProduct();
+onMounted(async () => {
+    await loadProduct();
+    dataSellClone.value = products.value;
 })
 
 </script>

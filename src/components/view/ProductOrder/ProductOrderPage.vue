@@ -12,45 +12,6 @@
                             @clearInput="handleSearch">
                         </BaseInput>
                     </div>
-                    <div class="btn-filter" ref="refFilterBtn">
-                        <BaseButton class="ms-button btn-white h-32 only-icon" @click="handleToggleFilter">
-                            <template #icon>
-                                <font-awesome-icon icon="filter" />
-                            </template>
-                        </BaseButton>
-                    </div>
-                    <div class="box-filter" ref="refFilterBox" v-show="showFilter">
-                        <div class="filter-title h-3">
-                            Lọc sản phẩm
-                        </div>
-                        <div class="filter-main">
-                            <div class="filter-item">
-                                <label class="m-label">Danh mục sản phẩm</label>
-                                <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn loại sản phẩm" propValue="Value"
-                                        propText="Text" :data=dataCategory @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
-                                </div>
-                            </div>
-                            <div class="filter-item">
-                                <label class="m-label">Giá</label>
-                                <div class="filter-object__input">
-                                    <BaseCombobox id="category" placeholder="Chọn khoảng giá" propValue="Value"
-                                        propText="Text" :data=dataPrice @getValueCombobox="getDataCombobox"
-                                        :resetValue="resetValue" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="filter-bot flex gap-8">
-                            <div class="filter-btn__close">
-                                <BaseButton class="m-button btn-white" text="Hủy" @click="handleCloseFilter">
-                                </BaseButton>
-                            </div>
-                            <div class="filter-btn__save">
-                                <BaseButton class="m-button btn-blue" text="Áp dụng" @click="handleFilter"></BaseButton>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="content-grid">
@@ -67,7 +28,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="product in productOrders" :key="product.ProductOrderID"
+                            <tr v-for="product in filteredProductOrders" :key="product.ProductOrderID"
                                 @dblclick="viewProductDetail(product)"
                                 @mouseenter="hoveredProductId = product.ProductOrderID"
                                 @mouseleave="hoveredProductId = null"
@@ -107,48 +68,6 @@ import { getValueEnum, formatDate } from '@/common/commonFn';
 
 const showFilter = ref(false);
 
-const dataCategory = [
-    {
-        Text: "Tất cả",
-        Value: ""
-    },
-    {
-        Text: "Áo",
-        Value: ""
-    },
-    {
-        Text: "Quần",
-        Value: ""
-    },
-    {
-        Text: "Giày dép",
-        Value: ""
-    },
-    {
-        Text: "Đồ phượt",
-        Value: ""
-    },
-]
-
-const dataPrice = [
-    {
-        Text: "< 500.000",
-        Value: ""
-    },
-    {
-        Text: "500.000 -> 1.000.000",
-        Value: ""
-    },
-    {
-        Text: "1.000.000 -> 3.000.000",
-        Value: ""
-    },
-    {
-        Text: "> 3.000.000",
-        Value: ""
-    },
-]
-
 const store = useStore();
 
 const getCookie = (name) => {
@@ -166,13 +85,23 @@ const productOrder = ref(null);
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
-const cart = ref([]);
-const showCart = ref(false);
 const showDetail = ref(false);
-const productDetail = ref(null);
 
 // Quản lý trạng thái hover và popup
 const hoveredProductId = ref(null);
+
+const keyword = ref(null);
+
+// Tạo một bản sao của productOrders để tránh thay đổi trực tiếp state
+const filteredProductOrders = ref(null);
+
+// Hàm để xử lý tìm kiếm
+const handleSearch = () => {
+    // Lọc các sản phẩm có tên chứa từ khóa (không phân biệt hoa thường)
+    filteredProductOrders.value = productOrders.value.filter((product) => {
+        return product.FullName.toLowerCase().includes(keyword.value.toLowerCase());
+    });
+};
 
 const viewProductDetail = async (product) => {
     productOrder.value = product;
@@ -203,12 +132,13 @@ const formatNumber = (number) => {
     }).format(number);
 };
 
-onMounted(() => {
+onMounted(async () => {
     let storeID = '00000000-0000-0000-0000-000000000000';
     if (userInfo.value.Role == 1) {
         storeID = userInfo.value.StoreID;
     }
-    store.dispatch('getOrder', storeID);
+    await store.dispatch('getOrder', storeID);
+    filteredProductOrders.value = productOrders.value;
 })
 
 </script>

@@ -30,7 +30,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="store in stores" :key="store.StoreID" @dblclick="viewProductDetail(store)"
+                            <tr v-for="store in filterStore" :key="store.StoreID" @dblclick="viewProductDetail(store)"
                                 @mouseenter="hoveredProductId = store.StoreID" @mouseleave="hoveredProductId = null"
                                 :class="{ 'row-hover': hoveredProductId === store.StoreID }">
                                 <td>{{ store.StoreName }}</td>
@@ -94,6 +94,19 @@ const getCookie = (name) => {
 const stores = computed(() => store.state.stores.storeInfo);
 const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
+const keyword = ref(null);
+
+// Tạo một bản sao của productOrders để tránh thay đổi trực tiếp state
+const filterStore = ref(null);
+
+// Hàm để xử lý tìm kiếm
+const handleSearch = () => {
+    // Lọc các sản phẩm có tên chứa từ khóa (không phân biệt hoa thường)
+    filterStore.value = stores.value.filter((store) => {
+        return store.StoreName.toLowerCase().includes(keyword.value.toLowerCase());
+    });
+};
+
 const viewProductDetail = async (storeEdit) => {
     modeAdd.value = false;
     await store.dispatch('getStoreByID', storeEdit.StoreID);
@@ -129,8 +142,9 @@ const confirmDeleteProduct = async () => {
     closeDeleteModal();
 };
 
-onMounted(() => {
-    store.dispatch('getStore');
+onMounted(async () => {
+   await store.dispatch('getStore');
+   filterStore.value = stores.value;
 })
 
 </script>

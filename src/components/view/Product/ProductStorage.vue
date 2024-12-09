@@ -52,7 +52,9 @@
             <div class="cart-footer">
                 <div class="filter-bot flex gap-8">
                     <div class="filter-btn__close">
-                        <BaseButton class="m-button btn-white" text="Tạo yêu cầu" @click="createStoreOrder">
+                        <BaseButton v-if="userInfo.Role != 2" class="m-button btn-white" text="Tạo yêu cầu" @click="createStoreOrder">
+                        </BaseButton>
+                        <BaseButton v-else class="m-button btn-white" text="Nhập hàng" @click="createStoreOrder">
                         </BaseButton>
                     </div>
                 </div>
@@ -117,7 +119,8 @@ const createStoreOrder = async () => {
             StorageOrderDetailID: generateGUID(),
             StorageOrderID: storageOrderID,
             ProductID: item.ProductID,
-            Amount: item.Quantity
+            Amount: item.Quantity,
+            CurrentAmount: item.TotalAmount,
         })
     })
 

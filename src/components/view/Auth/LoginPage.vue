@@ -66,7 +66,7 @@ const login = async () => {
 
 const setCookie = (name, value, days) => {
   const date = new Date();
-  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  date.setTime(date.getTime() + days * 4 * 60 * 60 * 1000);
   const expires = "expires=" + date.toUTCString();
   document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
@@ -87,7 +87,7 @@ const setCookie = (name, value, days) => {
 }
 
 .login-left{
-    background: url('@/assets/img/login_background.webp') no-repeat;
+    background: url('@/assets/img/background-login.jpg') no-repeat;
     background-position: center;
     background-size: cover;
     height: 100%;

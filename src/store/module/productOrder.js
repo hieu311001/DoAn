@@ -23,7 +23,7 @@ const mutations = {
 
 const actions = {
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * Lấy tất cả bản ghi 
      * @param {*} context 
      */
     async createOrder(context, param) {
@@ -38,7 +38,7 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * Lấy tất cả bản ghi 
      * @param {*} context 
      */
     async getOrder(context, param) {
@@ -53,7 +53,7 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * Lấy tất cả bản ghi 
      * @param {*} context 
      */
     async getOrderUser(context, param) {
@@ -68,7 +68,7 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * Lấy tất cả bản ghi 
      * @param {*} context 
      */
     async getOrderDetail(context, param) {
@@ -83,7 +83,7 @@ const actions = {
     },
 
     /**
-     * Lấy tất cả bản ghi danh hiệu thi đua
+     * Lấy tất cả bản ghi 
      * @param {*} context 
      */
     async updateOrder(context, param) {

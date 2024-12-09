@@ -9,7 +9,7 @@
                     :class="{ active: activeTab === 'sales' }" text="Doanh số"></BaseButton>
                 <BaseButton @click="showContent('products')" class="m-button btn-white" v-if="userInfo?.Role != 3 && userInfo?.Role != 2"
                     :class="{ active: activeTab === 'products' }" text="Sản phẩm"></BaseButton>
-                <BaseButton @click="showContent('inventory')" class="m-button btn-white" v-if="userInfo?.Role != 3 && userInfo.Role != 0 && userInfo?.Role != 2"
+                <BaseButton @click="showContent('inventory')" class="m-button btn-white" v-if="userInfo?.Role != 3 && userInfo?.Role != 0 && userInfo?.Role != 2"
                     :class="{ active: activeTab === 'inventory' }" text="Tồn kho"></BaseButton>
                 <BaseButton @click="showContent('store')" class="m-button btn-white" v-if="userInfo?.Role == 0"
                     :class="{ active: activeTab === 'store' }" text="Cửa hàng"></BaseButton>

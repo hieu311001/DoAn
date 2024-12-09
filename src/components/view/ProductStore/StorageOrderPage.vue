@@ -170,7 +170,7 @@ const dataPrice = [
 
 const store = useStore();
 
-const storageOrders = computed(() => store.state.storageOrder.dataStorageOrders);
+const storageOrders = ref(null);
 
 const refFilterBtn = ref("null");
 const refFilterBox = ref("null");
@@ -204,8 +204,9 @@ const handleCloseFilter = () => {
     showFilter.value = false;
 }
 
-onMounted(() => {
-    store.dispatch('getAllStorageOrder', '00000000-0000-0000-0000-000000000000');
+onMounted(async () => {
+    await store.dispatch('getAllStorageOrder', '00000000-0000-0000-0000-000000000000');
+    storageOrders.value = store.state.storageOrder.dataStorageOrders?.filter(f => f.StoreID != '00000000-0000-0000-0000-000000000000');
 })
 </script>
 

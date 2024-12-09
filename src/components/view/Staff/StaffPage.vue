@@ -33,7 +33,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="user in users" :key="user.UserID" @dblclick="viewProductDetail(user)"
+                            <tr v-for="user in filterUser" :key="user.UserID" @dblclick="viewProductDetail(user)"
                                 @mouseenter="hoveredProductId = user.UserID" @mouseleave="hoveredProductId = null"
                                 :class="{ 'row-hover': hoveredProductId === user.UserID }">
                                 <td>{{ user.FullName }}</td>
@@ -93,6 +93,19 @@ const closePopup = () => {
 
 const users = computed(() => store.state.user.users);
 
+const keyword = ref(null);
+
+// Tạo một bản sao của productOrders để tránh thay đổi trực tiếp state
+const filterUser = ref(null);
+
+// Hàm để xử lý tìm kiếm
+const handleSearch = () => {
+    // Lọc các sản phẩm có tên chứa từ khóa (không phân biệt hoa thường)
+    filterUser.value = users.value.filter((user) => {
+        return user.FullName.toLowerCase().includes(keyword.value.toLowerCase());
+    });
+};
+
 const viewProductDetail = async (userEdit) => {
     modeAdd.value = false;
     await store.dispatch('getStore');
@@ -130,8 +143,9 @@ const confirmDeleteProduct = async () => {
     closeDeleteModal();
 };
 
-onMounted(() => {
-    store.dispatch('getUserStaff');
+onMounted(async () => {
+    await store.dispatch('getUserStaff');
+    filterUser.value = users.value;
 })
 
 </script>

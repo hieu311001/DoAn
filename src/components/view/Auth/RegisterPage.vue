@@ -103,7 +103,7 @@ const handleRegister = async () => {
 }
 
 .register-left {
-    background: url('@/assets/img/login_background.webp') no-repeat;
+    background: url('@/assets/img/background-login.jpg') no-repeat;
     background-position: center;
     background-size: cover;
     height: 100%;

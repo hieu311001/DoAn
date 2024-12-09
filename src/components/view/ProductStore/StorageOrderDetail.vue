@@ -37,7 +37,7 @@
                                 </td>
                                 <td>{{ product.ProductName }}</td>
                                 <td>{{ product.Amount }}</td>
-                                <td>{{ product.TotalAmount }} </td>
+                                <td>{{ product.CurrentAmount }} </td>
                             </tr>
                         </tbody>
                     </table>
