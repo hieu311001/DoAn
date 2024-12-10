@@ -89,9 +89,7 @@ const actions = {
      */
     async deleteProductByID(context, param) {
         try {
-            const res = await axios.delete(`${constants.API_URL}/api/Product`, {
-                data: [param]
-            })
+            const res = await axios.put(`${constants.API_URL}/api/Product`, param)
             if (res.data) {
                 handleShowToast(context, "Xóa sản phẩm thành công", 1);
             }

@@ -353,7 +353,10 @@ const closeDeleteModal = () => {
 const confirmDeleteProduct = async () => {
     if (productToDelete.value) {
         // Gọi hàm xóa sản phẩm trong store hoặc thực hiện hành động xóa
-        await store.dispatch('deleteProductByID', productToDelete.value.ProductID);
+        await store.dispatch('deleteProductByID', {
+            ...productToDelete.value,
+            isDelete: 1
+        });
         loadProduct();
     }
 

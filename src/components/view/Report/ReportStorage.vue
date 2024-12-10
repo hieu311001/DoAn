@@ -1,13 +1,15 @@
 <template>
     <div>
         <!-- Lựa chọn hiển thị theo tháng hoặc năm -->
-        <div class="options">
-            <label>
-                <input type="radio" v-model="timePeriod" value="month" /> Theo ngày
-            </label>
-            <label>
-                <input type="radio" v-model="timePeriod" value="year" /> Theo tháng
-            </label>
+        <div class="options flex mt-1">
+            <div class="date-picker">
+                <label for="fromDate">Từ ngày:</label>
+                <input type="date" id="fromDate" v-model="fromDate" />
+            </div>
+            <div class="date-picker">
+                <label for="toDate">Đến ngày:</label>
+                <input type="date" id="toDate" v-model="toDate" />
+            </div>
         </div>
 
         <!-- Biểu đồ sản phẩm bán chạy -->
@@ -37,6 +39,15 @@ const storageReport = computed(() => store.state.stores.storageReportInfo);
 const storageReportInfo = ref(null);
 
 const timePeriod = ref('month');
+
+// Lấy ngày đầu tiên và ngày cuối cùng của tháng hiện tại
+const currentDate = new Date();
+const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+
+const fromDate = ref(firstDayOfMonth.toISOString().substr(0, 10));
+const toDate = ref(lastDayOfMonth.toISOString().substr(0, 10));
+
 const chartCanvas = ref(null);
 const chartCanvas2 = ref(null);
 let chartInstance = null;
@@ -130,23 +141,21 @@ const renderChart = () => {
     });
 };
 
-const processStorageReport = () => {
-
-};
-
 const loadStorageReport = async () => {
-    let isMonth = timePeriod.value === 'month' ? false : true;
-    await store.dispatch('getStorageReport', isMonth);
+    await store.dispatch('getStorageReport', {
+        fromDate: fromDate.value,
+        toDate: toDate.value
+    });
 };
 
-watch(timePeriod, async () => {
-    processStorageReport();
+// Watch sự thay đổi của khoảng thời gian
+watch([fromDate, toDate], async () => {
+    await loadStorageReport();
     renderChart();
 });
 
 onMounted(async () => {
     await loadStorageReport();
-    processStorageReport();
     renderChart();
 });
 </script>
@@ -173,5 +182,33 @@ body {
     overflow-x: hidden;
     margin: 0;
     padding: 0;
+}
+
+.options {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+
+.date-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.date-picker label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.date-picker input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 150px;
 }
 </style>

@@ -61,7 +61,7 @@ const actions = {
      */
     async getStoreReport(context, param) {
         try {
-            const res = await axios.get(`${constants.API_URL}/api/store/get-report/${param}`)
+            const res = await axios.post(`${constants.API_URL}/api/store/get-report`, param)
             if (res.data) {
                 context.commit("getStoreReport", res.data);
                 return true;
@@ -77,7 +77,7 @@ const actions = {
      */
     async getStorageReport(context, param) {
         try {
-            const res = await axios.get(`${constants.API_URL}/api/store/get-report-storage/${param}`)
+            const res = await axios.post(`${constants.API_URL}/api/store/get-report-storage`, param)
             if (res.data) {
                 context.commit("getStorageReport", res.data);
                 return true;

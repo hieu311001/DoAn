@@ -1,14 +1,17 @@
 <template>
     <div>
-        <!-- Tùy chọn lựa chọn hiển thị theo ngày trong tháng hoặc tháng trong năm -->
+        <!-- Tùy chọn lựa chọn khoảng thời gian -->
         <div class="options flex mt-1">
-            <label>
-                <input type="radio" v-model="timePeriod" value="day" /> Theo ngày trong tháng
-            </label>
-            <label>
-                <input type="radio" v-model="timePeriod" value="month" /> Theo tháng trong năm
-            </label>
-            <div class="order-status flex" v-if="userInfo.Role == 0">
+            <div class="date-picker">
+                <label for="fromDate">Từ ngày:</label>
+                <input type="date" id="fromDate" v-model="fromDate" />
+            </div>
+            <div class="date-picker">
+                <label for="toDate">Đến ngày:</label>
+                <input type="date" id="toDate" v-model="toDate" />
+            </div>
+            <div class="date-picker" v-if="userInfo.Role == 0">
+                <label>Cửa hàng:</label>
                 <BaseCombobox id="category" propValue="StoreID" propText="StoreText"
                     :valueCombobox="storeID" v-model="storeID" :data=stores
                     :resetValue="resetValue" />
@@ -30,8 +33,8 @@
 </template>
 
 <script setup>
-import Chart from 'chart.js/auto'
-import { ref, onMounted, onUpdated, computed, watch, reactive, onBeforeMount, watchEffect, nextTick } from 'vue';
+import Chart from 'chart.js/auto';
+import { ref, onMounted, watch } from 'vue';
 import { useStore } from 'vuex';
 
 const store = useStore();
@@ -41,11 +44,11 @@ const getCookie = (name) => {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
     return null; // Trả về null nếu không tìm thấy cookie
-}
+};
 
 const userInfo = ref(JSON.parse(getCookie('userInfo')));
 
-const productOrders = computed(() => store.state.productOrder.dataProductOrders);
+const productOrders = ref([]);
 const stores = ref(null);
 const storeID = ref(null);
 
@@ -53,188 +56,151 @@ const dataReport = ref({
     TotalMoney: null,
     TotalOrder: null,
     TotalUser: null
-})
+});
 
+// Lấy ngày đầu tiên và ngày cuối cùng của tháng hiện tại
+const currentDate = new Date();
+const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 2);
+const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
 
-const timePeriod = ref('day') // Lựa chọn mặc định: theo ngày trong tháng
-const chartCanvas = ref(null)
+const fromDate = ref(firstDayOfMonth.toISOString().substr(0, 10));
+const toDate = ref(lastDayOfMonth.toISOString().substr(0, 10));
+
+const chartCanvas = ref(null);
 let chartInstance = null;
 
 const formatNumber = (number) => {
     return new Intl.NumberFormat('vi-VN', {
-        minimumFractionDigits: 0, // Số chữ số thập phân tối thiểu
-        maximumFractionDigits: 2, // Số chữ số thập phân tối đa
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
     }).format(number);
-};
-
-// Dữ liệu biểu đồ theo ngày trong tháng
-const dayData = {
-    labels: Array.from({ length: 31 }, (_, i) => `Ngày ${i + 1}`),
-    datasets: [{
-        label: 'Doanh thu hàng ngày',
-        data: Array(31).fill(0), // Dữ liệu doanh thu theo ngày (sẽ cập nhật sau)
-        fill: false,
-        borderColor: '#42A5F5',
-        tension: 0.4,
-        borderWidth: 2
-    }]
-};
-
-// Dữ liệu biểu đồ theo tháng trong năm
-const monthData = {
-    labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
-    datasets: [{
-        label: 'Doanh thu theo tháng',
-        data: Array(12).fill(0), // Dữ liệu doanh thu theo tháng (sẽ cập nhật sau)
-        fill: false,
-        borderColor: '#42A5F5',
-        tension: 0.4,
-        borderWidth: 2
-    }]
-};
-
-// Cấu hình biểu đồ
-const chartOptions = {
-    responsive: true,
-    plugins: {
-        title: {
-            display: true,
-            text: 'Biểu đồ doanh thu'
-        },
-        tooltip: {
-            mode: 'index',
-            intersect: false
-        }
-    },
-    scales: {
-        x: {
-            title: {
-                display: true,
-                text: timePeriod.value === 'day' ? 'Ngày' : 'Tháng'
-            }
-        },
-        y: {
-            title: {
-                display: true,
-                text: 'Doanh thu (đ)'
-            }
-        }
-    }
 };
 
 // Hàm vẽ biểu đồ
 const renderChart = (data) => {
-    if (!getCookie('token')) {
-        return;
-    }
-
     if (chartInstance) {
-        chartInstance.destroy(); // Hủy biểu đồ cũ trước khi vẽ mới
+        chartInstance.destroy();
     }
     chartInstance = new Chart(chartCanvas.value, {
         type: 'line',
         data: data,
-        options: chartOptions
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Biểu đồ doanh thu'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Thời gian'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Doanh thu (đ)'
+                    }
+                }
+            }
+        }
     });
 };
 
-// Xử lý dữ liệu cho tổng doanh thu, số đơn hàng và số khách hàng
+// Xử lý dữ liệu theo khoảng thời gian
 const processProductOrder = () => {
-    let curDate = new Date();
-    let curMonth =  curDate.getMonth() + 1;
-    let curYear =  curDate.getYear();
-    let dailyRevenue = Array(31).fill(0); // Doanh thu theo ngày
-    let monthlyRevenue = Array(12).fill(0); // Doanh thu theo tháng
+    const start = new Date(fromDate.value);
+    const end = new Date(toDate.value);
+    
+    // Lọc đơn hàng trong khoảng thời gian
+    const filteredOrders = productOrders.value.filter(order => {
+        const orderDate = new Date(order.OrderDate);
+        return orderDate >= start && orderDate <= end && order.Status == 2;
+    });
 
-    let orderDone = productOrders.value.filter(item => item.Status == 2);
+    // Sắp xếp đơn hàng theo thời gian (từ cũ đến mới)
+    filteredOrders.sort((a, b) => new Date(a.OrderDate) - new Date(b.OrderDate));
 
-    if (timePeriod.value == 'day') {
-        let orderDay = orderDone.filter(item => {
-            var a = new Date(item.OrderDate);
-            if (a.getMonth() + 1 == curMonth && a.getYear() == curYear) {
-                return true;
-            }
-        })
+    // Tổng hợp dữ liệu
+    dataReport.value.TotalMoney = filteredOrders.reduce((sum, order) => sum + order.TotalPrice, 0);
+    dataReport.value.TotalUser = (new Set(filteredOrders.map(order => order.UserID))).size;
+    dataReport.value.TotalOrder = filteredOrders.length;
 
-        orderDay.forEach(order => {
-            let day = (new Date(order.OrderDate)).getDate();
-            dailyRevenue[day-1] += order.TotalPrice;
-        })
+    // Chuẩn bị dữ liệu biểu đồ
+    const chartData = {
+        labels: filteredOrders.map(order => new Date(order.OrderDate).toLocaleDateString('vi-VN')),
+        datasets: [{
+            label: 'Doanh thu',
+            data: filteredOrders.map(order => order.TotalPrice),
+            borderColor: '#42A5F5',
+            fill: false,
+            tension: 0.4
+        }]
+    };
 
-        dataReport.value.TotalMoney = orderDay.reduce((sum, order) => sum + order.TotalPrice, 0);
-        dataReport.value.TotalUser = (new Set(orderDay.map(order => order.UserID))).size;
-        dataReport.value.TotalOrder = orderDay.length;
-    } else if (timePeriod.value == 'month') {
-        let orderMonth = orderDone.filter(item => {
-            var a = new Date(item.OrderDate);
-            if (a.getYear() == curYear) {
-                return true;
-            }
-        })
-
-        orderMonth.forEach(order => {
-            let month = (new Date(order.OrderDate)).getMonth() + 1;
-            monthlyRevenue[month-1] += order.TotalPrice;
-        })
-
-        dataReport.value.TotalMoney = orderMonth.reduce((sum, order) => sum + order.TotalPrice, 0);
-        dataReport.value.TotalUser = (new Set(orderMonth.map(order => order.UserID))).size;
-        dataReport.value.TotalOrder = orderMonth.length;
-    }
-
-    // Cập nhật dữ liệu doanh thu vào biểu đồ
-    dayData.datasets[0].data = dailyRevenue;
-    monthData.datasets[0].data = monthlyRevenue;
-
-    // Render lại biểu đồ sau khi cập nhật dữ liệu
-    renderChart(timePeriod.value === 'day' ? dayData : monthData);
+    // Vẽ biểu đồ
+    renderChart(chartData);
 };
 
-const processStore = () => {
-    let storeInfo = store.state.stores.storeInfo;
-    storeInfo.forEach(item => {
-        if (item.StoreID == '00000000-0000-0000-0000-000000000000') {
-            item.StoreText = 'Tất cả';
-        }
-    })
-
-    stores.value = storeInfo;
-}
-
-// Watch sự thay đổi của thời gian
-watch(timePeriod, (newPeriod) => {
-    processProductOrder(); // Cập nhật lại dữ liệu khi thay đổi thời gian
-});
+// Watch sự thay đổi của khoảng thời gian
+watch([fromDate, toDate], processProductOrder);
 
 // Watch sự thay đổi của thời gian
 watch(storeID, async (newStore) => {
     await store.dispatch('getOrder', newStore);
+    productOrders.value = store.state.productOrder.dataProductOrders;
     processProductOrder(); // Cập nhật lại dữ liệu khi thay đổi thời gian
 });
 
-
-
-// Khởi tạo biểu đồ khi component được mount
+// Khởi tạo
 onMounted(async () => {
     await store.dispatch('getStore');
-    processStore();
-    let storeID = '00000000-0000-0000-0000-000000000000';
-    if (userInfo.value.Role == 1) {
-        storeID = userInfo.value.StoreID;
-    }
-    await store.dispatch('getOrder', storeID);
+
+    let storex = store.state.stores.storeInfo;
+    stores.value = storex.filter(f => {
+        if (f.StoreID == '00000000-0000-0000-0000-000000000000') {
+            f.StoreName = "Tất cả";
+            f.StoreText = "Tất cả";
+        }
+
+        return f;
+    });
+    const defaultStoreID = userInfo.value.Role === 1 ? userInfo.value.StoreID : '00000000-0000-0000-0000-000000000000';
+    await store.dispatch('getOrder', defaultStoreID);
+    productOrders.value = store.state.productOrder.dataProductOrders;
     processProductOrder();
-    renderChart(dayData) // Mặc định vẽ theo ngày trong tháng
-})
+});
 </script>
 
 <style scoped>
 .options {
+    display: flex;
+    gap: 20px;
     margin-bottom: 20px;
+    align-items: center;
 }
 
-.options label {
-    margin-right: 10px;
+.date-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.date-picker label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.date-picker input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 150px;
 }
 
 .summary {
